@@ -452,8 +452,8 @@ public:
 	}
 };
 void menu();//菜单
-int user_choice();
-void startcheck();
+int user_choice(string s);
+string startcheck();
 void input_book_information();
 void seek_book_location();
 void delete_book_infomation();
@@ -461,14 +461,14 @@ void borrow_book();
 void return_book();
 void count_book_information();
 void check_borrow_information();
-void revise_password();
+void revise_password(string s);
 void revise_book_information();
 int main()
 {
   system("color f0");
-  //startcheck();
+  string student_id1=startcheck();
   while(1){
-    if(user_choice()==10)
+    if(user_choice(student_id1)==10)
 		break;
   }
   system("exit");
@@ -502,7 +502,7 @@ void menu()
   cout<<"\t\t\t\t│         10    退出系统           │\n";
   cout<<"\t\t\t\t└──────────────────────────────────┘\n";
 }
-int user_choice()
+int user_choice(string s)
 {   //已完成
     menu();
     int n;
@@ -516,14 +516,14 @@ int user_choice()
     case 5:return_book();break;
     case 6:count_book_information();break;
     case 7:check_borrow_information();break;
-    case 8:revise_password();break;
+    case 8:revise_password(s);break;
     case 9:revise_book_information();break;
     case 10:break;
     default:cerr<<"无此对应功能"<<endl;break;
     }
     return n;
 }
-void startcheck()
+string startcheck()
 {   //已完成
     system("title 登录/注册主页面");
     student one;ifstream in;ofstream out;
@@ -545,7 +545,6 @@ void startcheck()
             }
             cout<<"                 学号:";
             cin>>student_id1;
-            student_id1+='/';
             char c;int flag=0;
             string password2,student_id2;
             while(!in.eof()){
@@ -559,14 +558,14 @@ void startcheck()
                 }
                 //cout<<password2<<endl;
                 int i=0,j=0;
-                if(student_id1==student_id2){
+                if(student_id1+'/'==student_id2){
                     for(i=0;i<3;i++){
                         cout<<"                 密码:";
                         cin>>password1;
                         password1+='\n';
                         flag=1;
                         if(password1==password2)
-                            return;
+                            return student_id1;
                         else
                             cout<<"密码错误,请重新输入"<<endl;
                     }
@@ -598,7 +597,7 @@ void startcheck()
                 while(c!='/'&&!in.eof()){
                     in.get(c);
                     student_id2+=c;
-                    cout<<student_id2<<endl;
+                    //cout<<student_id2<<endl;
                 }
                 while(c!='\n'&&!in.eof()){
                     in.get(c);
@@ -629,7 +628,7 @@ void startcheck()
         cin.get();
         cout<<"按任意键进入本系统"<<endl;
         cin.get();
-        return;
+        return student_id1;
     }
     else{
         cout<<"选择错误,系统即将退出"<<endl;
@@ -827,9 +826,77 @@ void check_borrow_information()
     cout<<"按任意键返回主菜单"<<endl;
     cin.get();
 }
-void revise_password()
-{   system("cls");cin.get();
-    cout<<"此功能暂未实现"<<endl;
+void revise_password(string s)
+{   //已完成，但未测试
+    system("cls");cin.get();
+    ifstream in;ofstream out;
+    string student_id1,password1,password2,password3,password4;
+    in.open("password.txt");
+    out.open("password1.txt",ios_base::app);
+    char c;
+    while(in.peek()!=EOF){
+        in.get(c);
+        while(c!='/'){
+            student_id1+=c;
+            in.get();
+        }
+        while(c!='.'){
+            password1+=c;
+            in.get(c);
+        }
+        int i;int flag=0;int n;
+        if(student_id1==s){
+            for(i=0;i<3;i++){
+                 cout<<"请输入原密码:";cin>>password2;
+                 if(password2==password1){
+                    for(;;){
+                        cout<<"请输入新密码:";cin>>password3;
+                        cout<<"请确认新密码:";cin>>password4;
+                        if(password3==password4){
+                            flag=1;break;
+                        }
+                        else{
+                            cout<<"两次输入内容不相同,请重新输入"<<endl;
+                        }
+                    }
+                 }
+                 else{
+                    cout<<"密码错误,请重新输入"<<endl;
+                 }
+                 if(flag==1)
+                    break;
+            }
+            if(i==3){
+                cout<<"你已连续三次输入错误密码,密码修改功能即将退出"<<endl;
+                return;
+            }
+            else{
+                cout<<"你确认将密码修改为:"<<password4<<"?(1(yes)/0(no))";cin>>n;
+                if(n==1){
+                    out<<student_id1<<"/"<<password4<<".\n";
+                }
+                else{
+                    cout<<"感谢你使用本功能"<<endl;
+                    return;
+                }
+            }
+        }
+        else{
+            out<<student_id1<<"/"<<password1<<".\n";
+        }
+    }
+    in.close();
+    out.close();
+    out.open("password.txt",ios::trunc);
+    in.open("password1.txt");
+    while(in.peek()!=EOF){
+        in.get(c);
+        out<<c;
+    }
+    out.close();
+    in.close();
+    cout<<"修改成功"<<endl;
+    cin.get();
     cout<<"按任意键返回主菜单"<<endl;
     cin.get();
 }
