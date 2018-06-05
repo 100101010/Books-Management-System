@@ -35,6 +35,7 @@ public:
 	}
 	friend int operator-(Time &time1,Time &time2);
 };
+//ÔËËã·ûÖØÔØ
 int operator-(Time &time1,Time &time2)
 {
     int sum=0;
