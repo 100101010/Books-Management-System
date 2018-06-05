@@ -695,9 +695,9 @@ void input_book_information()
             else
                 break;
         }
-        out<<book_name1<<" "<<book_author1<<" "<<count1<<" "<<ISBN1<<"   "<<order1;
-        out<<"  "<<publishing_company1<<" "<<year1<<"/"<<month1<<"/";
-        out<<day1<<" "<<classification1<<"  "<<book_shelf1<<"  "<<storey1<<".\n";
+        out<<book_name1<<"/"<<book_author1<<"/"<<count1<<"/"<<ISBN1<<"/"<<order1;
+        out<<"/"<<publishing_company1<<"/"<<year1<<"/"<<month1<<"/";
+        out<<day1<<"/"<<classification1<<"/"<<book_shelf1<<"/"<<storey1<<".\n";
         cout<<"继续吗?(1/0)";
         cin>>n;
         if(n==0){
@@ -723,15 +723,17 @@ void seek_book_location()
     cout<<"请输入待查询位置的书籍名:";cin>>book_name1;
     char c;int flag=0;
     while(!in.eof()){
-        while(c!=' '){
-            in.get(c);
+        in.get(c);
+        while(c!='/'){
             book_name2+=c;
+            in.get(c);
         }
         //cout<<book_name2<<endl;
-        if(book_name1+' '==book_name2){
+        //in.get(c);
+        if(book_name1==book_name2){
             while(c!='.'){
-                in.get(c);
                 other_book_information+=c;
+                in.get(c);
             }
             flag=1;
             cout<<"已找到"<<endl;
@@ -751,8 +753,54 @@ void seek_book_location()
     cin.get();
 }
 void delete_book_infomation()
-{   system("cls");cin.get();
+{   //已完成
+    system("cls");cin.get();
+    string book_name1,book_name2,othor_book_information;
+    cout<<"请输入欲修改的书籍名称:";cin>>book_name1;
+    ofstream out;ifstream in;
+    in.open("book.txt");
+    if(!in||in.eof()){
+        cerr<<"文件不存在或未录入任何书籍信息"<<endl;
+        cin.get();
+        return ;
+    }
+    char c;
+    while(in.peek()!=EOF){
+        in.get(c);
+        while(c!='/'){
+            book_name2+=c;
+            in.get(c);
+        }
+        while(c!='.'){
+            othor_book_information+=c;
+            in.get(c);
+        }
+        //cout<<book_name2<<endl;
+        if(book_name1!=book_name2){
+            out.open("book1.txt",ios_base::app);
+            if(!out){
+                cerr<<"文件打开失败"<<endl;
+                cin.get();
+                return ;
+            }
 
+            cout<<othor_book_information<<endl;
+            out<<book_name2<<"/"<<othor_book_information<<".\n";
+            out.close();
+        }
+    }
+    in.close();
+    out.open("book.txt",ios::trunc);
+    in.open("book1.txt");
+    while(in.peek()!=EOF){
+        in.get(c);
+        out<<c;
+    }
+    out.close();
+    in.close();
+    cout<<"删除成功"<<endl;
+    cin.get();
+    cout<<"按任意键返回主菜单"<<endl;
     cin.get();
 }
 void borrow_book()
