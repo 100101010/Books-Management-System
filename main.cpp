@@ -26,7 +26,7 @@ public:
 	{
 	  cout<<year<<"年"<<month<<"月"<<day<<"日"<<endl;
 	}
-	bool is_leapyear()
+	bool is_leapyear()//判断是否为闰年
 	{
       if(year%400==0||year%100!=0&&year%4==0)
         return true;
@@ -36,12 +36,12 @@ public:
 	friend int operator-(Time &time1,Time &time2);
 };
 //运算符重载
-int operator-(Time &time1,Time &time2)
-{
+int operator-(Time &time1,Time &time2)//重载-运算符得到两个时间的差值，返回值为两个时间
+{                                     //相差的天数,如果大于n天则需要收费
     int sum=0;
     int a1[13]={0,0,31,59,90,120,151,181,212,243,273,304,334};
     int a2[13]={0,0,31,60,91,121,152,182,213,244,274,305,335};
-    if(time1.year==time2.year){
+    if(time1.year==time2.year){//如果两个时间的年属性相同，只进行月和天的相减
         if(time1.is_leapyear()){
             if(time2.is_leapyear()){
                 sum+=a2[time2.month]+time2.day-a2[time1.month]-time1.day;
@@ -63,9 +63,9 @@ int operator-(Time &time1,Time &time2)
             }
         }
         }
-    else if(time1.year+1==time2.year){
-        if(time1.is_leapyear()){
-            if(time2.is_leapyear()){
+    else if(time1.year+1==time2.year){//如果前面一个时间的年属性刚好等于后面一个
+        if(time1.is_leapyear()){      //时间的年属性加一,即昨年和今年的区别,只进行
+            if(time2.is_leapyear()){  //月和天属性的相减
                 sum+=a2[time2.month]+time2.day+(366-a2[time1.month]-time1.day);
                 return sum;
             }
@@ -118,7 +118,7 @@ int operator-(Time &time1,Time &time2)
 class book_date
 {
 private:
-    Time date;
+    Time date;//添加Time类的一个对象作为书籍的出版日期
 	string book_name;
 	string ISBN;
     string book_author;
@@ -244,7 +244,7 @@ public:
 	    cout<<"修改成功"<<endl;
 	}
 };
-class book_location:public book_date
+class book_location:public book_date//保存书籍位置的一个类,继承book_date
 {
 private:
     string classification;//类别
@@ -320,7 +320,7 @@ public:
 	    cout<<"修改成功"<<endl;
 	}
 };
-class borrow_return_book
+class borrow_return_book//借还书的类
 {
 private:
 	Time borrow_time;
@@ -361,7 +361,7 @@ public:
 		book[i].show_book_date_information();
 	}
 };
-class student:public borrow_return_book
+class student:public borrow_return_book//学生类,继承借还书的类，表示学生借还书
 {
 private:
 	string name;
@@ -370,8 +370,9 @@ private:
     string student_id;//学号
     string password;
 public:
-	student(string s1="",string s2="",string s3="",string s4="",string s5="")
-	:borrow_return_book()
+	student(string s1="",string s2="",string s3="",string s4="",string s5="",
+         int y1=0,int m1=0,int d1=0,int y2=0,int m2=0,int d2=0,int a=0,bool b=true)
+	:borrow_return_book(y1,m1,d1,y2,m2,d2,a,b)
 	{
        name=s1;
 	   id_number=s2;
@@ -446,38 +447,34 @@ public:
 	  }
       cout<<"修改成功"<<endl;
 	}
-	void revise_password()
-	{
-
-	}
 };
 void menu();//菜单
 int user_choice(string s);
-string startcheck();
-void input_book_information();
-void seek_book_location();
-void delete_book_infomation();
-void borrow_book();
-void return_book();
-void count_book_information();
-void check_borrow_information();
-void revise_password(string s);
-void revise_book_information();
+string startcheck();//登录或注册
+void input_book_information();//输入书籍信息
+void seek_book_location();//寻找书籍信息
+void delete_book_infomation();//删除书籍信息
+void borrow_book();//借书
+void return_book();//还书
+void count_book_information();//统计图书信息
+void check_borrow_information();//查询借阅信息
+void revise_password(string s);//修改密码
+void revise_book_information();//修改图书信息
 int main()
 {
-  system("color f0");
-  string student_id1=startcheck();
+  system("color f0");//将背景设置成白色,文字设置为黑色
+  string student_id1=startcheck();//登录系统之前检查,包括登录和注册,同时获取学号
   while(1){
-    if(user_choice(student_id1)==10)
-		break;
+    if(user_choice(student_id1)==10)//用户选择此系统的功能,同时返回用户的选择,如果为
+		break;                      //10(代表退出系统),则结束循环,程序正常退出
   }
   system("exit");
   return 0;
 }
 void menu()
 {
-  system("cls");
-  system("title 主菜单-图书管理借阅系统");
+  system("cls");//清屏
+  system("title 主菜单-图书管理借阅系统");//将标题栏命名为---
   cout<<"\t\t\t\t┌──────────────────────────────────┐\n";
   cout<<"\t\t\t\t│         图书管理借阅系统         │\n";
   cout<<"\t\t\t\t├──────────────────────────────────┤\n";
@@ -547,7 +544,7 @@ string startcheck()
             cin>>student_id1;
             char c;int flag=0;
             string password2,student_id2;
-            while(!in.eof()){
+            while(!in.eof()){//读取文件中保存的账号和密码
                 while(c!='/'&&!in.eof()){
                     in.get(c);
                     student_id2+=c;
@@ -558,8 +555,8 @@ string startcheck()
                 }
                 //cout<<password2<<endl;
                 int i=0,j=0;
-                if(student_id1+'/'==student_id2){
-                    for(i=0;i<3;i++){
+                if(student_id1+'/'==student_id2){//如果检测到用户的账号
+                    for(i=0;i<3;i++){//用户有三次输入密码的机会
                         cout<<"                 密码:";
                         cin>>password1;
                         password1+='\n';
@@ -684,7 +681,7 @@ void input_book_information()
                 break;
         }
         SYSTEMTIME sys;
-        GetLocalTime(&sys);
+        GetLocalTime(&sys);//获取系统时间
         for(;;){
             cout<<"请输入出版日期(按年月日分别输入,中间用空格隔开):";
             cin>>year1>>month1>>day1;
@@ -693,7 +690,7 @@ void input_book_information()
                 cout<<"日期输入错误,请重新输入"<<endl;
             else
                 break;
-        }
+        }//输出到文件
         out<<book_name1<<"/"<<book_author1<<"/"<<count1<<"/"<<ISBN1<<"/"<<order1;
         out<<"/"<<publishing_company1<<"/"<<year1<<"/"<<month1<<"/";
         out<<day1<<"/"<<classification1<<"/"<<book_shelf1<<"/"<<storey1<<".\n";
@@ -797,6 +794,8 @@ void delete_book_infomation()
     }
     out.close();
     in.close();
+    out.open("book1.txt",ios::trunc);
+    out.close();//清空book1.txt文件的内容
     cout<<"删除成功"<<endl;
     cin.get();
     cout<<"按任意键返回主菜单"<<endl;
@@ -827,7 +826,7 @@ void check_borrow_information()
     cin.get();
 }
 void revise_password(string s)
-{   //已完成，但未测试
+{   //已完成
     system("cls");cin.get();
     ifstream in;ofstream out;
     string student_id1,password1,password2,password3,password4;
@@ -838,12 +837,14 @@ void revise_password(string s)
         in.get(c);
         while(c!='/'){
             student_id1+=c;
-            in.get();
+            in.get(c);
         }
-        while(c!='.'){
+        in.get(c);
+        while(c!='\n'){
             password1+=c;
             in.get(c);
         }
+        //cout<<password1<<endl;
         int i;int flag=0;int n;
         if(student_id1==s){
             for(i=0;i<3;i++){
@@ -873,7 +874,7 @@ void revise_password(string s)
             else{
                 cout<<"你确认将密码修改为:"<<password4<<"?(1(yes)/0(no))";cin>>n;
                 if(n==1){
-                    out<<student_id1<<"/"<<password4<<".\n";
+                    out<<student_id1<<"/"<<password4<<"\n";
                 }
                 else{
                     cout<<"感谢你使用本功能"<<endl;
@@ -895,6 +896,8 @@ void revise_password(string s)
     }
     out.close();
     in.close();
+    out.open("password1.txt",ios::trunc);
+    out.close();//将password1文件的内容清空
     cout<<"修改成功"<<endl;
     cin.get();
     cout<<"按任意键返回主菜单"<<endl;
