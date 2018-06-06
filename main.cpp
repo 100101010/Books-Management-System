@@ -161,6 +161,7 @@ public:
            else
                break;
 	    }
+	    book_name=s1;
 	    cout<<"修改成功"<<endl;
 	}
 	void revise_book_date_ISBN()
@@ -177,6 +178,7 @@ public:
             else
                 break;
 	    }
+	    ISBN=s1;
 	    cout<<"修改成功"<<endl;
 	}
 	void revise_book_date_author()
@@ -193,6 +195,7 @@ public:
             else
                 break;
 	    }
+	    book_author=s1;
 	    cout<<"修改成功"<<endl;
 	}
 	void revise_book_date_publishing_company()
@@ -209,6 +212,7 @@ public:
             else
                 break;
 	    }
+	    publishing_company=s1;
 	    cout<<"修改成功"<<endl;
 	}
 	void revise_book_date_order()
@@ -225,6 +229,7 @@ public:
             else
                 break;
 	    }
+	    order=s1;
 	    cout<<"修改成功"<<endl;
 	}
 	void revise_book_date_count()
@@ -241,6 +246,7 @@ public:
             else
                 break;
 	    }
+	    count=s1;
 	    cout<<"修改成功"<<endl;
 	}
 };
@@ -285,6 +291,7 @@ public:
            else
                break;
 	    }
+	    classification=s1;
 	    cout<<"修改成功"<<endl;
 	}
 	void revise_book_location_book_shelf()
@@ -301,9 +308,10 @@ public:
            else
                break;
 	    }
+	    book_shelf=s1;
 	    cout<<"修改成功"<<endl;
 	}
-	void revise_book_date_name()
+	void revise_book_date_storey()
 	{
 	    int s1;
 	    int s2;
@@ -317,6 +325,7 @@ public:
            else
                break;
 	    }
+	    storey=s1;
 	    cout<<"修改成功"<<endl;
 	}
 };
