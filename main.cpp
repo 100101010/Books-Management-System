@@ -1,42 +1,112 @@
-#include <iostream>
+#include<iostream>
+#include<string>
 #include<windows.h>
 #include<fstream>
 #include<iomanip>
+#include<conio.h>
 using namespace std;
-class Time  //ÓÃÀ´¼ÇÂ¼Ê±¼ä(°üÀ¨½èÔÄÊ±¼ä£¬³ö°æÈÕÆÚ)
+bool check_time(int y,int m,int d)
+{
+    SYSTEMTIME sys;
+    GetLocalTime(&sys);//»ñÈ¡ÏµÍ³Ê±¼ä
+    if(y>sys.wYear){
+        return false;
+    }
+    else{
+        if(sys.wYear==y&&sys.wMonth<m)
+            return false;
+        else{
+            if(sys.wYear==y&&sys.wMonth==m&&sys.wDay<d)
+                return false;
+        }
+    }//ÒÔÉÏ¼ì²âÊÇ·ñÊäÈëÎªÎ´·¢ÉúµÄÊ±¼ä
+    //½ÓÏÂÀ´¼ì²âdayÊäÈëÊÇ·ñ·ûºÏÊµ¼Ê
+    int flag=1;
+    if(m>12||m<1)
+        return false;
+    if(y%400==0||(y%4==0&&y%100!=0))//Èç¹ûÊÇÈòÄê
+    {
+        switch(m){
+        case 1:case 3:case 5:case 7:case 8:case 10:case 12:
+            if(d>31)
+                flag=0;break;
+        case 4:case 6:case 9:case 11:
+            if(d>30)
+                flag=0;break;
+        case 2:
+            if(d>29)
+                flag=0;break;
+        }
+    }
+    else{
+        switch(m){
+        case 1:case 3:case 5:case 7:case 8:case 10:case 12:
+            if(d>31)
+                flag=0;break;
+        case 4:case 6:case 9:case 11:
+            if(d>30)
+                flag=0;break;
+        case 2:
+            if(d>28)
+                flag=0;break;
+        }
+    }
+    if(flag==0)
+        return false;
+    else
+        return true;
+}
+class Time
 {
 private:
-  int year;
-  int month;
-  int day;
+    int year;
+    int month;
+    int day;
 public:
-	Time(int a=0,int b=0,int c=0)
-	{
-	  year=a;
-	  month=b;
-	  day=c;
-	}
-	void set_time(int a=0,int b=0,int c=0)
-	{
-	  year=a;
-	  month=b;
-	  day=c;
-	}
-	void show_time()
-	{
-	  cout<<year<<"Äê"<<month<<"ÔÂ"<<day<<"ÈÕ"<<endl;
-	}
-	bool is_leapyear()//ÅÐ¶ÏÊÇ·ñÎªÈòÄê
-	{
-      if(year%400==0||year%100!=0&&year%4==0)
-        return true;
-      else
-        return false;
-	}
-	friend int operator-(Time &time1,Time &time2);
+    Time()
+    {
+        year=0;month=0;day=0;
+    }
+    void set_time(int y=0,int m=0,int d=0)
+    {
+        year=y;month=m;day=d;
+    }
+    void show_time()
+    {
+        cout<<year<<"Äê"<<month<<"ÔÂ"<<day<<"ºÅ";
+    }
+    friend istream &operator>>(istream &in,Time &p)
+    {
+        in>>p.year>>p.month>>p.day;
+        return in;
+    }
+    friend ostream &operator<<(ostream &out,const Time &p)
+    {
+        out<<p.year<<" "<<p.month<<" "<<p.day;
+        return out;
+    }
+    bool is_leapyear()
+    {
+        if(year%400==0||(year%4==0&&year&100!=0))
+           return true;
+        else
+           return false;
+    }
+    int get_year()
+    {
+        return year;
+    }
+    int get_month()
+    {
+        return month;
+    }
+    int get_day()
+    {
+        return day;
+    }
+    friend int operator-(Time &time1,Time &time2);
 };
-//ÔËËã·ûÖØÔØ
-int operator-(Time &time1,Time &time2)//ÖØÔØ-ÔËËã·ûµÃµ½Á½¸öÊ±¼äµÄ²îÖµ£¬·µ»ØÖµÎªÁ½¸öÊ±¼ä
+int operator-(Time &time2,Time &time1)//ÖØÔØ-ÔËËã·ûµÃµ½Á½¸öÊ±¼äµÄ²îÖµ£¬·µ»ØÖµÎªÁ½¸öÊ±¼ä
 {                                     //Ïà²îµÄÌìÊý,Èç¹û´óÓÚnÌìÔòÐèÒªÊÕ·Ñ
     int sum=0;
     int a1[13]={0,0,31,59,90,120,151,181,212,243,273,304,334};
@@ -115,171 +185,68 @@ int operator-(Time &time1,Time &time2)//ÖØÔØ-ÔËËã·ûµÃµ½Á½¸öÊ±¼äµÄ²îÖµ£¬·µ»ØÖµÎªÁ
       }
     }
 }
-class book_date
+class book_location
 {
 private:
-    Time date;//Ìí¼ÓTimeÀàµÄÒ»¸ö¶ÔÏó×÷ÎªÊé¼®µÄ³ö°æÈÕÆÚ
-	string book_name;
-	string ISBN;
-    string book_author;
-    string publishing_company;
-	int order;//°æ´Î
-	int count;//ÊýÁ¿
+    string classification;
+    int book_shelf;
+    int storey;
 public:
-    book_date(string s1="",string s2="",string s3="",string s4="",int order1=0,int count1=0,
-              int year1=0,int month1=0,int day1=0)
-	:date(year1,month1,day1)
-	{
-        book_name=s1;
-        ISBN=s2;
-        book_author=s3;
-        publishing_company=s4;
-        order=order1;
-        count=count1;
-	}
-    void show_book_date_information()
-	{
-	  cout<<"ÊéÃû:"<<book_name<<endl;
-	  cout<<"ISBNºÅ:"<<ISBN<<endl;
-	  cout<<"×÷Õß:"<<book_author<<endl;
-	  cout<<"³ö°æÉç:"<<publishing_company<<endl;
-	  cout<<"³ö°æÈÕÆÚ:";
-	  date.show_time();
-	  cout<<"´ËÍ¼Êé¹ÝÏÖ´æÊýÁ¿:"<<count<<endl;
-	}
-	void revise_book_date_name()
-	{
-	    string s1;
-	    string s2;
-	    for(;;){
-           cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂÃû×Ö:";
-	       cin>>s1;
-	       cout<<"ÇëÔÙ´ÎÈ·ÈÏÃû×Ö:";
-	       cin>>s2;
-	       if(s1!=s2)
-               cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-           else
-               break;
-	    }
-	    book_name=s1;
-	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-	void revise_book_date_ISBN()
-	{
-	    string s1;
-	    string s2;
-	    for(;;){
-            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂISBNºÅ:";
-	        cin>>s1;
-            cout<<"ÇëÔÙ´ÎÈ·ÈÏISBNºÅ:";
-            cin>>s2;
-            if(s1!=s2)
-                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-	    }
-	    ISBN=s1;
-	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-	void revise_book_date_author()
-	{
-	    string s1;
-	    string s2;
-	    for(;;){
-            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂ×÷ÕßÐÕÃû:";
-            cin>>s1;
-            cout<<"ÇëÔÙ´ÎÈ·ÈÏ×÷ÕßÐÕÃû:";
-            cin>>s2;
-            if(s1!=s2)
-                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-	    }
-	    book_author=s1;
-	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-	void revise_book_date_publishing_company()
-	{
-	    string s1;
-	    string s2;
-	    for(;;){
-            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂ³ö°æÉç:";
-            cin>>s1;
-            cout<<"ÇëÔÙ´ÎÈ·ÈÏ³ö°æÉç:";
-            cin>>s2;
-            if(s1!=s2)
-                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-	    }
-	    publishing_company=s1;
-	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-	void revise_book_date_order()
-	{
-	    int s1;
-	    int s2;
-	    for(;;){
-            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂ°æ´Î:";
-            cin>>s1;
-            cout<<"ÇëÔÙ´ÎÈ·ÈÏ°æ´Î:";
-            cin>>s2;
-            if(s1!=s2)
-                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-	    }
-	    order=s1;
-	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-	void revise_book_date_count()
-	{
-	    int s1;
-	    int s2;
-	    for(;;){
-            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂÊýÁ¿:";
-            cin>>s1;
-            cout<<"ÇëÔÙ´ÎÈ·ÈÏÊýÁ¿:";
-            cin>>s2;
-            if(s1!=s2)
-                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-	    }
-	    count=s1;
-	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-};
-class book_location:public book_date//±£´æÊé¼®Î»ÖÃµÄÒ»¸öÀà,¼Ì³Ðbook_date
-{
-private:
-    string classification;//Àà±ð
-    int book_shelf;//Êé¼ÜÊý
-    int storey;//²ãÊý
-public:
-    book_location(string s1="",int book_shelf1=0,int storey1=0,string s2="",string s3="",string s4="",string s5="",
-                  int order1=0,int count1=0,int year1=0,int month1=0,int day1=0)
-    :book_date(s2,s3,s4,s5,order1,count1,year1,month1,day1)
+    book_location()
     {
-        classification=s1;
-        book_shelf=book_shelf1;
-        storey=storey1;
+        book_shelf=0;
+        storey=0;
     }
-    void set_book_location(string classification1="",int book_shelf1=0,int storey1=0)
+    void set_book_location()
     {
-        classification=classification1;
-        book_shelf=book_shelf1;
-        storey=storey1;
+        cout<<"ÇëÊäÈëÍ¼ÊéÀà±ð:";cin>>classification;
+        for(;;){
+            cout<<"ÇëÊäÈëÊé¼ÜÊý:";cin>>book_shelf;
+            if(book_shelf<1){
+                cout<<"ÊäÈë´íÎó£¬Êé¼ÜÊý±ØÐë´óÓÚµÈÓÚ1"<<endl;
+                cout<<"ÇëÖØÐÂÊäÈë"<<endl;
+            }
+            else
+                break;
+        }
+        for(;;){
+            cout<<"ÇëÊäÈë²ãÊý:";cin>>storey;
+            if(book_shelf<1){
+                cout<<"ÊäÈë´íÎó£¬²ãÊý±ØÐë´óÓÚµÈÓÚ1"<<endl;
+                cout<<"ÇëÖØÐÂÊäÈë"<<endl;
+            }
+            else
+                break;
+        }
     }
-    void show_book_location_information()
+    void show_book_location()
     {
         cout<<"Àà±ð:"<<classification<<endl;
         cout<<"Êé¼ÜÊý:"<<book_shelf<<endl;
         cout<<"²ãÊý:"<<storey<<endl;
     }
-    void revise_book_location_classification()
-	{
-	    string s1;
+    virtual istream &input(istream& in){
+        in>>classification;
+        in>>book_shelf;
+        in>>storey;
+        return in;
+    }
+    friend istream &operator>>(istream &in,book_location &p)
+    {
+        return p.input(in);
+    }
+    friend ostream &operator <<(ostream &out,const book_location &book){
+       return book.print(out);
+    }
+    virtual ostream &print(ostream& out)const{
+       out<<classification<<" ";
+       out<<book_shelf<<" ";
+       out<<storey<<"\n";
+       return out;
+    }
+    void revise_classification()
+    {
+        string s1;
 	    string s2;
 	    for(;;){
            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂÀà±ð:";
@@ -293,255 +260,523 @@ public:
 	    }
 	    classification=s1;
 	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-	void revise_book_location_book_shelf()
-	{
-	    int s1;
+    }
+    void revise_book_shelf()
+    {
+        int s1;
 	    int s2;
 	    for(;;){
            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂÊé¼ÜÊý:";
 	       cin>>s1;
 	       cout<<"ÇëÔÙ´ÎÈ·ÈÏµÚ¼¸Êé¼Ü:";
 	       cin>>s2;
-	       if(s1!=s2)
-               cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+	       if(s1!=s2||s1<1)
+               cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬»òÊäÈë´íÎó£¬ÇëÖØÐÂÊäÈë"<<endl;
            else
                break;
 	    }
 	    book_shelf=s1;
 	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-	void revise_book_date_storey()
-	{
-	    int s1;
+    }
+    void revise_storey()
+    {
+        int s1;
 	    int s2;
 	    for(;;){
            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂ²ãÊý:";
 	       cin>>s1;
 	       cout<<"ÇëÔÙ´ÎÈ·ÈÏ²ãÊý:";
 	       cin>>s2;
-	       if(s1!=s2)
-               cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+	       if(s1!=s2||s2<1)
+               cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬»òÊäÈë´íÎó£¬ÇëÖØÐÂÊäÈë"<<endl;
            else
                break;
 	    }
 	    storey=s1;
 	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
+    }
+    string get_classification()
+    {
+        return classification;
+    }
+    int get_book_shelf()
+    {
+        return book_shelf;
+    }
+    int get_storey()
+    {
+        return storey;
+    }
 };
-class borrow_return_book//½è»¹ÊéµÄÀà
+class book_date:public book_location
 {
 private:
-	Time borrow_time;
-	Time return_time;
-	book_date book[10];//Ò»´Î×î¶à½èÊ®±¾Êé
-	int count;//ÓÃÀ´¼ÇÂ¼ÓÃ»§½èÊéµÄ±¾Êý
-	bool return_yes_or_not;//ÓÃÀ´¼ÇÂ¼ÓÃ»§ÊÇ·ñ»¹Êé,1´ú±íÒÑ¹é»¹»òÕßÎ´½èÊé
+    string book_name;
+    string book_author;
+    string publishing_company;
+    string ISBN;
+    Time publishing_date;
+    int order;//°æ´Î
+    int amount;//ÊýÁ¿
 public:
-	/*borrow_return_book()
-	{
-	  borrow_time.set_time(0,0,0);
-	  return_time.set_time(0,0,0);
-	  count=0;
-	  return_yes_or_not=true;
-	}*/
-    borrow_return_book(int y1=0,int m1=0,int d1=0,int y2=0,int m2=0,int d2=0,int a=0,bool b=true)
-	:borrow_time(y1,m1,d1),return_time(y2,m2,d2)
-	{
-	  count=a;
-      return_yes_or_not=b;
-	}
-	void show_borrow_return_book_information()
-	{
-	  cout<<"½èÔÄÊ±¼ä:";
-	  borrow_time.show_time();
-	  cout<<"Í¼Êé×´Ì¬:";
-	  if(return_yes_or_not==false){
-	    cout<<"Î´¹é»¹"<<endl;
-	  }
-	  else{
-	    cout<<"ÒÑ¹é»¹"<<endl;
-		cout<<"¹é»¹Ê±¼ä:";
-		return_time.show_time();
-	  }
-	  int i;
-	  cout<<"½èÔÄÊé¼®:"<<endl;
-	  for(i=0;i<count;i++)
-		book[i].show_book_date_information();
-	}
+    book_date():book_location(),publishing_date()
+    {
+        //string¶ÔÏó´´½¨Ê±ÊÇ¿Õstring¶ÔÏó£¬¹Ê²»ÓÃÔÙ¸³³õÖµ
+        amount=0;
+        order=0;
+    }
+    void low_amount()
+    {
+        amount--;
+    }
+    void high_amount()
+    {
+        amount++;
+    }
+    string get_book_name()
+    {
+        return book_name;
+    }
+    string get_book_author()
+    {
+        return book_author;
+    }
+    string get_ISBN()
+    {
+        return ISBN;
+    }
+    string get_pubishing_company()
+    {
+        return publishing_company;
+    }
+    Time get_publishing_date()
+    {
+        return publishing_date;
+    }
+    int get_order()
+    {
+        return order;
+    }
+    int get_amount()
+    {
+        return amount;
+    }
+    virtual ostream &print(ostream& out)const{
+        out<<book_name<<" ";
+        out<<book_author<<" ";
+        out<<publishing_company<<" ";
+        out<<ISBN<<" ";
+        out<<publishing_date<<" ";
+        out<<order<<" ";
+        out<<amount<<" ";
+        book_location::print(out);
+        return out;
+    }
+    void set_book_date()
+    {
+        cout<<"ÇëÊäÈëÍ¼ÊéÊéÃû:";cin>>book_name;
+        cout<<"ÇëÊäÈëÍ¼Êé×÷Õß:";cin>>book_author;
+        cout<<"ÇëÊäÈëÍ¼Êé³ö°æÉç:";cin>>publishing_company;
+        cout<<"ÇëÊäÈëÍ¼ÊéISBNºÅ:";cin>>ISBN;
+        for(;;){
+            cout<<"ÇëÊäÈëÍ¼Êé°æ´Î:";cin>>order;
+            if(order<=0)
+                cout<<"ÊäÈë´íÎó,°æ´Î²»ÄÜÐ¡ÓÚµÈÓÚ1"<<endl;
+            else
+                break;
+        }
+        for(;;){
+            cout<<"ÇëÊäÈëÍ¼ÊéÊýÁ¿:";cin>>amount;
+            if(amount<=0)
+                cout<<"ÊäÈë´íÎó,ÊýÁ¿²»ÄÜÐ¡ÓÚµÈÓÚ1"<<endl;
+            else
+                break;
+        }
+        int year1,month1,day1;
+        for(;;){
+            cout<<"ÇëÊäÈë³ö°æÈÕÆÚ(°´ÄêÔÂÈÕ·Ö±ðÊäÈë,ÖÐ¼äÓÃ¿Õ¸ñ¸ô¿ª):";
+            cin>>year1>>month1>>day1;
+            if(!check_time(year1,month1,day1))
+                cout<<"ÈÕÆÚÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+        }
+        publishing_date.set_time(year1,month1,day1);
+        set_book_location();
+    }
+    void show_book_date()
+    {
+        cout<<"ÊéÃû:"<<book_name<<endl;
+        cout<<"×÷Õß:"<<book_author<<endl;
+        cout<<"³ö°æÉç:"<<publishing_company<<endl;
+        cout<<"ISBNºÅ:"<<ISBN<<endl;
+        cout<<"°æ´Î:"<<order<<endl;
+        cout<<"ÊýÁ¿:"<<amount<<endl;
+        show_book_location();
+    }
+    virtual istream &input(istream &in)
+    {
+        in>>book_name;
+        in>>book_author;
+        in>>publishing_company;
+        in>>ISBN;
+        in>>publishing_date;
+        in>>order;
+        in>>amount;
+        book_location::input(in);
+        return in;
+    }
+    void revise_name()
+    {
+        string s1;
+	    string s2;
+	    for(;;){
+           cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂÃû×Ö:";
+	       cin>>s1;
+	       cout<<"ÇëÔÙ´ÎÈ·ÈÏÃû×Ö:";
+	       cin>>s2;
+	       if(s1!=s2)
+               cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+           else
+               break;
+	    }
+	    book_name=s1;
+	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+    }
+    void revise_author()
+    {
+        string s1;
+	    string s2;
+	    for(;;){
+            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂ×÷ÕßÐÕÃû:";
+            cin>>s1;
+            cout<<"ÇëÔÙ´ÎÈ·ÈÏ×÷ÕßÐÕÃû:";
+            cin>>s2;
+            if(s1!=s2)
+                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+	    }
+	    book_author=s1;
+	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+    }
+    void revise_publishing_company()
+    {
+        string s1;
+	    string s2;
+	    for(;;){
+            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂ³ö°æÉç:";
+            cin>>s1;
+            cout<<"ÇëÔÙ´ÎÈ·ÈÏ³ö°æÉç:";
+            cin>>s2;
+            if(s1!=s2)
+                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+	    }
+	    publishing_company=s1;
+	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+    }
+    void revise_ISBN()
+    {
+        string s1;
+	    string s2;
+	    for(;;){
+            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂISBNºÅ:";
+	        cin>>s1;
+            cout<<"ÇëÔÙ´ÎÈ·ÈÏISBNºÅ:";
+            cin>>s2;
+            if(s1!=s2)
+                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+	    }
+	    ISBN=s1;
+	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+    }
+    void revise_order()
+    {
+        int s1;
+	    int s2;
+	    for(;;){
+            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂ°æ´Î:";
+            cin>>s1;
+            cout<<"ÇëÔÙ´ÎÈ·ÈÏ°æ´Î:";
+            cin>>s2;
+            if(s1!=s2)
+                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+	    }
+	    order=s1;
+	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+    }
+    void revise_amount()
+    {
+        int s1;
+	    int s2;
+	    for(;;){
+            cout<<"ÇëÊäÈë±¾Í¼ÊéµÄÐÂÊýÁ¿:";
+            cin>>s1;
+            cout<<"ÇëÔÙ´ÎÈ·ÈÏÊýÁ¿:";
+            cin>>s2;
+            if(s1!=s2)
+                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+	    }
+	    amount=s1;
+	    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+    }
+    void revise_publishing_date()
+    {
+        int year1,month1,day1;
+        for(;;){
+            cout<<"ÇëÒÀ´ÎÊäÈëÐÂµÄ³ö°æÊ±¼ä,ÓÃ¿Õ¸ñ·Ö¿ª:";
+            cin>>year1>>month1>>day1;
+            if(!check_time(year1,month1,day1))
+                cout<<"ÈÕÆÚÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+        }
+        publishing_date.set_time(year1,month1,day1);
+    }
 };
-class student:public borrow_return_book//Ñ§ÉúÀà,¼Ì³Ð½è»¹ÊéµÄÀà£¬±íÊ¾Ñ§Éú½è»¹Êé
+class borrow_return_book
 {
 private:
-	string name;
+    Time borrow_time;
+    Time return_time;
+    string book_name[10];//Ò»´Î×î¶à½èÔÄÊ®±¾Êé
+    int number;//½èÊéµÄ±¾Êý
+    bool return_y_n;//ÊÇ·ñ¹é»¹
+public:
+    borrow_return_book():borrow_time(),return_time()
+    {
+        number=0;
+        return_y_n=true;
+    }
+    void revise_return_y_n()
+    {
+        return_y_n=false;
+    }
+    int get_number()
+    {
+        return number;
+    }
+    string get_book_name(int i)
+    {
+        return book_name[i];
+    }
+    Time get_brtime()
+    {
+        return borrow_time;
+    }
+    Time get_rtime()
+    {
+        return return_time;
+    }
+    void show_brbook_information()
+    {
+        int i;
+        cout<<"½èÔÄ"<<number<<"±¾Êé"<<endl;
+        cout<<"ÊéÃû·Ö±ðÎª:";
+        for(i=0;i<number;i++)
+            cout<<book_name[i]<<" ";
+        cout<<"½èÔÄÊ±¼ä:";
+        borrow_time.show_time();cout<<endl;
+        if(!return_y_n)
+            cout<<"Í¼Êé×´Ì¬:Î´¹é»¹"<<endl;
+        else{
+            return_time.show_time();
+            cout<<"Í¼Êé×´Ì¬:ÒÑ¹é»¹"<<endl;
+        }
+    }
+    void set_bbook_information(int number1,string book1[10])//Éú³É½èÊéÐÅÏ¢
+    {
+        SYSTEMTIME sys;
+        GetLocalTime(&sys);//»ñÈ¡ÏµÍ³Ê±¼ä
+        borrow_time.set_time(sys.wYear,sys.wMonth,sys.wDay);
+        number=number1;
+        return_y_n=false;
+        int i;
+        for(i=0;i<number1;i++)
+            book_name[i]=book1[i];
+    }
+    void revise_brbook_infomation(int number1,string book1[10])
+    {
+        number=number1;
+        return_y_n=false;
+        int i;
+        for(i=0;i<number1;i++)
+            book_name[i]=book1[i];
+    }
+    void set_rbook_information(int number1,string book[10])
+    {
+        SYSTEMTIME sys;
+        GetLocalTime(&sys);//»ñÈ¡ÏµÍ³Ê±¼ä
+        return_time.set_time(sys.wYear,sys.wMonth,sys.wDay);
+        return_y_n=true;
+        number=number1;
+        int i;
+        for(i=0;i<number1;i++)
+            book_name[i]=book[i];
+    }
+    friend istream &operator>>(istream &in,borrow_return_book &p)
+    {
+        return p.input(in);
+    }
+    friend ostream &operator<<(ostream &out,const borrow_return_book &p)
+    {
+        return p.read(out);
+    }
+    virtual ostream &read(ostream &out)const
+    {
+        int i;
+        for(i=0;i<number;i++)
+            out<<book_name[i]<<" ";
+        out<<borrow_time<<" ";
+        out<<return_time<<" ";
+        out<<number<<" ";
+        out<<return_y_n<<"\n";
+        return out;
+    }
+    virtual istream &input(istream &in)
+    {
+        int i;
+        for(i=0;i<number;i++)
+            in>>book_name[i];
+        in>>borrow_time;
+        in>>return_time;
+        in>>number;
+        in>>return_y_n;
+        return in;
+    }
+};
+class people:public borrow_return_book//ÏµÍ³ÓÃ»§°üÀ¨Ñ§Éú,ÀÏÊ¦ºÍ¹ÜÀíÔ±,Í³³ÆÎªÈË
+{
+private:
+    string name;
 	string id_number;//Éí·ÝÖ¤ºÅ
 	string phone_number;
-    string student_id;//Ñ§ºÅ
+    string id;//Ñ§ºÅ
     string password;
 public:
-	student(string s1="",string s2="",string s3="",string s4="",string s5="",
-         int y1=0,int m1=0,int d1=0,int y2=0,int m2=0,int d2=0,int a=0,bool b=true)
-	:borrow_return_book(y1,m1,d1,y2,m2,d2,a,b)
+    people():borrow_return_book()
+    {
+
+    }
+    virtual ostream &read(ostream &out)const
+    {
+        out<<name<<" ";
+        out<<id_number<<" ";
+        out<<phone_number<<" ";
+        out<<id<<" ";
+        out<<borrow_return_book::read(out);
+        return out;
+    }
+    string get_name()
+    {
+        return name;
+    }
+    string get_id()
+    {
+        return id;
+    }
+    void set_people(string s1,string s2,string s3,string s4,string s5)
+    {
+        name=s1;
+        id_number=s2;
+        phone_number=s3;
+        id=s4;
+        password=s5;
+    }
+    void show_people()
+    {
+        cout<<"ÐÕÃû:"<<name<<endl;
+        cout<<"Éí·ÝÖ¤ºÅ:"<<id_number<<endl;
+        cout<<"µç»°ºÅÂë:"<<phone_number<<endl;
+        cout<<"Ñ§ºÅ»ò±àºÅ:"<<id<<endl;
+    }
+    void revise_student_name()
 	{
-       name=s1;
-	   id_number=s2;
-	   password=s3;
-	   phone_number=s4;
-	   student_id=s5;
-	}
-	void show_student_information()
-	{
-	  cout<<"ÐÕÃû:"<<name<<endl;
-	  cout<<"Éí·ÝÖ¤ºÅ:"<<id_number<<endl;
-	  cout<<"µç»°ºÅÂë:"<<phone_number<<endl;
-	  cout<<"Ñ§ºÅ:"<<student_id<<endl;
-	}
-	void revise_name()
-	{
-	  string s1,s2;
-	  for(;;){
-        cout<<"ÇëÊäÈëÐÂÐÕÃû:"<<endl;
-	    cin>>s1;
-	    cout<<"ÇëÔÙ´ÎÈ·ÈÏÄãµÄÐÂÐÕÃû:"<<endl;
-	    cin>>s2;
-        if(s1!=s2)
-          cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-        else
-          break;
-	  }
-      cout<<"ÐÞ¸Ä³É¹¦"<<endl;
-	}
-	void revise_id_number()
-	{
-	  string s1,s2;
-	  for(;;){
-        cout<<"ÇëÊäÈëÐÂÉí·ÝÖ¤ºÅ:"<<endl;
-	    cin>>s1;
-	    cout<<"ÇëÔÙ´ÎÈ·ÈÏÄãµÄÉí·ÝÖ¤ºÅ:"<<endl;
-	    cin>>s2;
-        if(s1!=s2)
-          cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-        else
-          break;
-	  }
-      cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+        string s1,s2;
+        for(;;){
+            cout<<"ÇëÊäÈëÐÂÐÕÃû:"<<endl;
+            cin>>s1;
+            cout<<"ÇëÔÙ´ÎÈ·ÈÏÄãµÄÐÂÐÕÃû:"<<endl;
+            cin>>s2;
+            if(s1!=s2)
+                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+        }
+        name=s1;
+        cout<<"ÐÞ¸Ä³É¹¦"<<endl;
 	}
     void revise_phone_number()
 	{
-	  string s1,s2;
-	  for(;;){
-        cout<<"ÇëÊäÈëÐÂµç»°ºÅÂë:"<<endl;
-	    cin>>s1;
-	    cout<<"ÇëÔÙ´ÎÈ·ÈÏÄãµÄµç»°ºÅÂë:"<<endl;
-	    cin>>s2;
-        if(s1!=s2)
-          cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-        else
-          break;
-	  }
-      cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+        string s1,s2;
+        for(;;){
+            cout<<"ÇëÊäÈëÐÂµç»°ºÅÂë:"<<endl;
+            cin>>s1;
+            cout<<"ÇëÔÙ´ÎÈ·ÈÏÄãµÄµç»°ºÅÂë:"<<endl;
+            cin>>s2;
+            if(s1!=s2)
+                cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+        }
+        phone_number=s1;
+        cout<<"ÐÞ¸Ä³É¹¦"<<endl;
 	}
-    void revise_student_id()
+	virtual istream &input(istream& in)
 	{
-	  string s1,s2;
-	  for(;;){
-        cout<<"ÇëÊäÈëÐÂÑ§ºÅ:"<<endl;
-	    cin>>s1;
-	    cout<<"ÇëÔÙ´ÎÈ·ÈÏÄãµÄÑ§ºÅ:"<<endl;
-	    cin>>s2;
-        if(s1!=s2)
-          cerr<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬£¬ÇëÖØÐÂÊäÈë"<<endl;
-        else
-          break;
-	  }
-      cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+	    in>>name;
+	    in>>id_number;
+	    in>>phone_number;
+	    in>>id;
+	    borrow_return_book::input(in);
+	    return in;
 	}
 };
 void menu();//²Ëµ¥
-int user_choice(string s);
-string startcheck();//µÇÂ¼»ò×¢²á
+int user_choice(people &person);
 void input_book_information();//ÊäÈëÊé¼®ÐÅÏ¢
-void seek_book_location();//Ñ°ÕÒÊé¼®ÐÅÏ¢
-void delete_book_infomation();//É¾³ýÊé¼®ÐÅÏ¢
-void borrow_book();//½èÊé
-void return_book();//»¹Êé
+people startcheck();
+void seek_book_location();
+void delete_book_infomation();
+void borrow_book(people &person);//½èÊé
+void return_book(people &person);//»¹Êé
 void count_book_information();//Í³¼ÆÍ¼ÊéÐÅÏ¢
-void check_borrow_information();//²éÑ¯½èÔÄÐÅÏ¢
-void revise_password(string s);//ÐÞ¸ÄÃÜÂë
+void check_borrow_return_information();//²éÑ¯½èÔÄÐÅÏ¢
+void revise_password(people &person);//ÐÞ¸ÄÃÜÂë
 void revise_book_information();//ÐÞ¸ÄÍ¼ÊéÐÅÏ¢
 int main()
 {
-  system("color f0");//½«±³¾°ÉèÖÃ³É°×É«,ÎÄ×ÖÉèÖÃÎªºÚÉ«
-  string student_id1=startcheck();//µÇÂ¼ÏµÍ³Ö®Ç°¼ì²é,°üÀ¨µÇÂ¼ºÍ×¢²á,Í¬Ê±»ñÈ¡Ñ§ºÅ
-  while(1){
-    if(user_choice(student_id1)==10)//ÓÃ»§Ñ¡Ôñ´ËÏµÍ³µÄ¹¦ÄÜ,Í¬Ê±·µ»ØÓÃ»§µÄÑ¡Ôñ,Èç¹ûÎª
+    system("color f0");//½«±³¾°ÉèÖÃ³É°×É«,ÎÄ×ÖÉèÖÃÎªºÚÉ«
+    people person=startcheck();//µÇÂ¼ÏµÍ³Ö®Ç°¼ì²é,°üÀ¨µÇÂ¼ºÍ×¢²á,Í¬Ê±»ñÈ¡Ñ§ºÅ
+    while(1){
+        if(user_choice(person)==10)//ÓÃ»§Ñ¡Ôñ´ËÏµÍ³µÄ¹¦ÄÜ,Í¬Ê±·µ»ØÓÃ»§µÄÑ¡Ôñ,Èç¹ûÎª
 		break;                      //10(´ú±íÍË³öÏµÍ³),Ôò½áÊøÑ­»·,³ÌÐòÕý³£ÍË³ö
-  }
-  system("exit");
-  return 0;
-}
-void menu()
-{
-  system("cls");//ÇåÆÁ
-  system("title Ö÷²Ëµ¥-Í¼Êé¹ÜÀí½èÔÄÏµÍ³");//½«±êÌâÀ¸ÃüÃûÎª---
-  cout<<"\t\t\t\t©°©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©´\n";
-  cout<<"\t\t\t\t©¦         Í¼Êé¹ÜÀí½èÔÄÏµÍ³         ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         1   ÊäÈëÍ¼ÊéÐÅÏ¢         ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         2   ²éÕÒÍ¼ÊéÎ»ÖÃ         ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         3   É¾³ýÍ¼ÊéÐÅÏ¢         ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         4     ½èÔÄÍ¼Êé           ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         5     ¹é»¹Í¼Êé           ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         6   Í³¼ÆÍ¼ÊéÐÅÏ¢         ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         7   ²éÑ¯½èÔÄÐÅÏ¢         ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         8   ÐÞ¸ÄµÇÂ¼ÃÜÂë         ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         9   ÐÞ¸ÄÍ¼ÊéÐÅÏ¢         ©¦\n";
-  cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
-  cout<<"\t\t\t\t©¦         10    ÍË³öÏµÍ³           ©¦\n";
-  cout<<"\t\t\t\t©¸©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¼\n";
-}
-int user_choice(string s)
-{   //ÒÑÍê³É
-    menu();
-    int n;
-    cout<<"Çë°´¼üÑ¡Ôñ¶ÔÓ¦¹¦ÄÜ:";
-    cin>>n;
-    switch(n){
-    case 1:input_book_information();break;
-    case 2:seek_book_location();break;
-    case 3:delete_book_infomation();break;
-    case 4:borrow_book();break;
-    case 5:return_book();break;
-    case 6:count_book_information();break;
-    case 7:check_borrow_information();break;
-    case 8:revise_password(s);break;
-    case 9:revise_book_information();break;
-    case 10:break;
-    default:cerr<<"ÎÞ´Ë¶ÔÓ¦¹¦ÄÜ"<<endl;break;
     }
-    return n;
+    system("exit");
+    return 0;
 }
-string startcheck()
-{   //ÒÑÍê³É
+people startcheck()
+{
+    people one;
     system("title µÇÂ¼/×¢²áÖ÷Ò³Ãæ");
-    student one;ifstream in;ofstream out;
-    string student_id1,phone_number1;string password1,id_number1,name1;
+    ifstream in,ine;ofstream out;
+    string id1,phone_number1,password1,id_number1,name1;
     cout<<"                 1:µÇÂ¼"<<endl;
     cout<<"                 2:×¢²á"<<endl;
     int n;
-    cout<<"              ÇëÊäÈëÄãµÄÑ¡Ôñ:";
+    cout<<"                 ÇëÊäÈëÄãµÄÑ¡Ôñ:";
     cin>>n;
-    //cin.get();
     if(n==1){
         system("cls");
+        system("title µÇÂ¼");
         for(;;){
             in.open("password.txt",ios_base::app);
             if(!in){
@@ -550,28 +785,34 @@ string startcheck()
                 exit(0);
             }
             cout<<"                 Ñ§ºÅ:";
-            cin>>student_id1;
-            char c;int flag=0;
-            string password2,student_id2;
-            while(!in.eof()){//¶ÁÈ¡ÎÄ¼þÖÐ±£´æµÄÕËºÅºÍÃÜÂë
-                while(c!='/'&&!in.eof()){
-                    in.get(c);
-                    student_id2+=c;
-                }
-                while(c!='\n'&&!in.eof()){
-                    in.get(c);
-                    password2+=c;
-                }
-                //cout<<password2<<endl;
-                int i=0,j=0;
-                if(student_id1+'/'==student_id2){//Èç¹û¼ì²âµ½ÓÃ»§µÄÕËºÅ
+            cin>>id1;
+            int flag=0;
+            string password2,id2,id3;
+            while(!in.eof()&&in.peek()!=EOF){//¶ÁÈ¡ÎÄ¼þÖÐ±£´æµÄÕËºÅºÍÃÜÂë
+                in>>id2>>password2;
+                int i=0;
+                if(id1==id2){//Èç¹û¼ì²âµ½ÓÃ»§µÄÕËºÅ
                     for(i=0;i<3;i++){//ÓÃ»§ÓÐÈý´ÎÊäÈëÃÜÂëµÄ»ú»á
                         cout<<"                 ÃÜÂë:";
-                        cin>>password1;
-                        password1+='\n';
+                        char s[21];int j=0;
+                        while((s[j]=getch())!=13&&j!=20){
+                            putch('*');
+                            j++;
+                        }
+                        s[j]='\0';
+                        password1=s;
                         flag=1;
-                        if(password1==password2)
-                            return student_id1;
+                        if(password1==password2){
+                            ine.open("student.txt",ios_base::app);
+                            while(!in.eof()&&ine.peek()!=EOF){
+                                ine>>id3>>name1>>phone_number1>>id_number1;
+                                if(id2==id3){
+                                    ine.close();
+                                    one.set_people(name1,id_number1,phone_number1,id1,password1);
+                                    return one;
+                                }
+                            }
+                        }
                         else
                             cout<<"ÃÜÂë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
                     }
@@ -589,6 +830,7 @@ string startcheck()
     }
     else if(n==2){
         system("cls");
+        system("title ×¢²á");
         in.open("password.txt",ios_base::app);
         if(!in){
             cerr<<"ÎÄ¼þ´ò¿ªÊ§°Ü(ÎÄ¼þ²»´æÔÚ)£¬°´ÈÎÒâ¼ü½áÊø"<<endl;
@@ -596,20 +838,12 @@ string startcheck()
             exit(0);
         }
         for(;;){
-            cout<<"                 Ñ§ºÅ:";cin>>student_id1;
-            string password2,student_id2;
-            char c;int flag=0;
-            while(!in.eof()){
-                while(c!='/'&&!in.eof()){
-                    in.get(c);
-                    student_id2+=c;
-                    //cout<<student_id2<<endl;
-                }
-                while(c!='\n'&&!in.eof()){
-                    in.get(c);
-                    password2+=c;
-                }
-                if(student_id2==student_id1){
+            cout<<"                 Ñ§ºÅ»òÕß±àºÅ:";cin>>id1;
+            string password2,id2,password3;
+            int flag=0;
+            while(in.peek()!=EOF&&in.eof()){
+                in>>id2>>password2;
+                if(id2==id1){
                     flag=1;
                     cout<<"ÏµÍ³ÒÑ´æÔÚ´ËÑ§ºÅ,Çë¼ì²éÑ§ºÅÊÇ·ñÊäÈëÕýÈ·»òÕßÊÇ·ñÒÑ×¢²á"<<endl;
                     break;
@@ -619,13 +853,36 @@ string startcheck()
                 cout<<"                 ÐÕÃû:";cin>>name1;
                 cout<<"                 Éí·ÝÖ¤ºÅ:";cin>>id_number1;
                 cout<<"                 µç»°ºÅÂë:";cin>>phone_number1;
-                cout<<"                 ÃÜÂë:";cin>>password1;
+                for(;;){
+                    cout<<"                 ÃÜÂë(×î¶à20Î»):";
+                    char s1[21];int j=0;
+                    while((s1[j]=getch())!=13&&j!=20){
+                        putch('*');
+                        j++;
+                    }
+                    s1[j]='\0';
+                    password1=s1;
+                    j=0;
+                    cout<<"ÇëÔÙ´ÎÈ·ÈÏÃÜÂë:";
+                    char s2[21];
+                    while((s2[j]=getch())!=13&&j!=20){
+                        putch('*');
+                        j++;
+                    }
+                    s2[j]='\0';
+                    password3=s2;
+                    if(password1==password3)
+                        break;
+                    else{
+                        cout<<"Á½´ÎÃÜÂëÊäÈë²»ÏàÍ¬,ÇëÖØÐÂÊäÈë"<<endl;
+                    }
+                }
                 in.close();
                 out.open("password.txt",ios_base::app);
-                out<<student_id1<<"/"<<password1<<"\n";
+                out<<id1<<" "<<password1<<"\n";
                 out.close();
                 out.open("student.txt",ios_base::app);
-                out<<id_number1<<"/"<<name1<<"/"<<phone_number1<<"/"<<student_id1<<"\n";
+                out<<id1<<" "<<name1<<" "<<phone_number1<<" "<<id_number1<<"\n";
                 out.close();
                 break;
             }
@@ -634,7 +891,8 @@ string startcheck()
         cin.get();
         cout<<"°´ÈÎÒâ¼ü½øÈë±¾ÏµÍ³"<<endl;
         cin.get();
-        return student_id1;
+        one.set_people(name1,id_number1,phone_number1,id1,password1);
+        return one;
     }
     else{
         cout<<"Ñ¡Ôñ´íÎó,ÏµÍ³¼´½«ÍË³ö"<<endl;
@@ -642,159 +900,421 @@ string startcheck()
         exit(0);
     }
 }
-void input_book_information()
+void menu()
+{
+    system("cls");//ÇåÆÁ
+    system("title Ö÷²Ëµ¥-Í¼Êé¹ÜÀí½èÔÄÏµÍ³");//½«±êÌâÀ¸ÃüÃûÎª---
+    cout<<"\t\t\t\t©°©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©´\n";
+    cout<<"\t\t\t\t©¦         Í¼Êé¹ÜÀí½èÔÄÏµÍ³         ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         1   ÊäÈëÍ¼ÊéÐÅÏ¢         ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         2   ²éÕÒÍ¼ÊéÎ»ÖÃ         ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         3   É¾³ýÍ¼ÊéÐÅÏ¢         ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         4     ½èÔÄÍ¼Êé           ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         5     ¹é»¹Í¼Êé           ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         6   Í³¼ÆÍ¼ÊéÐÅÏ¢         ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         7   ²éÑ¯½èÔÄÐÅÏ¢         ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         8   ÐÞ¸ÄµÇÂ¼ÃÜÂë         ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         9   ÐÞ¸ÄÍ¼ÊéÐÅÏ¢         ©¦\n";
+    cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+    cout<<"\t\t\t\t©¦         10    ÍË³öÏµÍ³           ©¦\n";
+    cout<<"\t\t\t\t©¸©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¼\n";
+}
+int user_choice(people &person)
 {   //ÒÑÍê³É
-    system("cls");cin.get();
+    menu();
+    int n;
+    cout<<"Çë°´¼üÑ¡Ôñ¶ÔÓ¦¹¦ÄÜ:";
+    cin>>n;
+    switch(n){
+    case 1:input_book_information();break;
+    case 2:seek_book_location();break;
+    case 3:delete_book_infomation();break;
+    case 4:borrow_book(person);break;
+    case 5:return_book(person);break;
+    case 6:count_book_information();break;
+    case 7:check_borrow_return_information();break;
+    case 8:revise_password(person);break;
+    case 9:revise_book_information();break;
+    case 10:break;
+    default:cerr<<"ÎÞ´Ë¶ÔÓ¦¹¦ÄÜ"<<endl;break;
+    }
+    return n;
+}
+void input_book_information()
+{
+    system("cls");system("title Ìí¼ÓÊé¼®ÐÅÏ¢");
     ofstream out;int n;
-    string book_author1,book_name1,publishing_company1,ISBN1,classification1;
-    int count1,order1,book_shelf1,storey1;
-    int year1,month1,day1;
-    out.open("book.txt",ios_base::app);
-    if(!out){
-        cerr<<"ÎÄ¼þ´ò¿ªÊ§°Ü(ÎÄ¼þ²»´æÔÚ)£¬°´ÈÎÒâ¼ü½áÊø"<<endl;
-        cin.get();
-        return ;
-    }
     for(;;){
-        cout<<"ÇëÊäÈë×÷Õß:";cin>>book_author1;
-        cout<<"ÇëÊäÈëÊéÃû:";cin>>book_name1;
-        cout<<"ÇëÊäÈëISBNºÅ:";cin>>ISBN1;
-        cout<<"ÇëÊäÈë³ö°æÉç:";cin>>publishing_company1;
-        for(;;){
-            cout<<"ÇëÊäÈë°æ´Î:";cin>>order1;
-            if(order1<=0)
-                cout<<"ÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
+        book_date book;
+        book.set_book_date();
+        out.open("book.txt",ios_base::app);
+        if(!out){
+            cerr<<"ÎÄ¼þ´ò¿ªÊ§°Ü"<<endl;
+            cin.get();
+            return;
         }
-        for(;;){
-            cout<<"ÇëÊäÈëÊýÁ¿:";cin>>count1;
-            if(count1<=0)
-                cout<<"ÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-        }
-        cout<<"ÇëÊäÈëÍ¼ÊéÀà±ð:";cin>>classification1;
-        for(;;){
-            cout<<"ÇëÊäÈëÍ¼ÊéÔÚµÚ¼¸¸öÊé¼Ü:";cin>>book_shelf1;
-            if(book_shelf1<=0)
-                cout<<"ÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-        }
-        for(;;){
-            cout<<"ÇëÊäÈëÍ¼ÊéËùÔÚÊé¼ÜµÄ²ãÊý:";cin>>storey1;
-            if(storey1<=0)
-                cout<<"ÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-        }
-        SYSTEMTIME sys;
-        GetLocalTime(&sys);//»ñÈ¡ÏµÍ³Ê±¼ä
-        for(;;){
-            cout<<"ÇëÊäÈë³ö°æÈÕÆÚ(°´ÄêÔÂÈÕ·Ö±ðÊäÈë,ÖÐ¼äÓÃ¿Õ¸ñ¸ô¿ª):";
-            cin>>year1>>month1>>day1;
-            if(sys.wYear<year1||sys.wYear==year1&&sys.wMonth<month1||
-               sys.wYear==year1&&sys.wMonth==month1&&sys.wDay<day1)
-                cout<<"ÈÕÆÚÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
-            else
-                break;
-        }//Êä³öµ½ÎÄ¼þ
-        out<<book_name1<<"/"<<book_author1<<"/"<<count1<<"/"<<ISBN1<<"/"<<order1;
-        out<<"/"<<publishing_company1<<"/"<<year1<<"/"<<month1<<"/";
-        out<<day1<<"/"<<classification1<<"/"<<book_shelf1<<"/"<<storey1<<".\n";
-        cout<<"¼ÌÐøÂð?(1/0)";
+        out<<book;
+        cout<<"ÊÇ·ñ¼ÌÐøÌí¼Ó?"<<endl;
+        cout<<"1 :yes"<<endl;
+        cout<<"0 :no"<<endl;
         cin>>n;
-        if(n==0){
-            out.close();break;
-        }
+        if(n==0)
+            break;
     }
-    cout<<"ÊäÈë³É¹¦"<<endl;
-    cin.get();
-    cout<<"°´ÈÎÒâ¼ü·µ»Ø"<<endl;
+    out.close();
+    cout<<"Ìí¼Ó³É¹¦,°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
     cin.get();
 }
 void seek_book_location()
-{   //ÒÑÍê³É
-    system("cls");cin.get();
-    string book_name1,book_name2,other_book_information;
+{
+    system("cls");system("title ²éÕÒÍ¼ÊéÐÅÏ¢");
+    string book_name1;
     ifstream in;
     in.open("book.txt",ios_base::app);
-    if(!in){
-        cout<<"ÎÄ¼þ´ò¿ªÊ§°Ü"<<endl;
+    if(!in||in.eof()){
+        cout<<"ÎÄ¼þ´ò¿ªÊ§°Ü»òÎÄ¼þÎÞÊé¼®ÐÅÏ¢"<<endl;
         cin.get();
         return ;
     }
-    cout<<"ÇëÊäÈë´ý²éÑ¯Î»ÖÃµÄÊé¼®Ãû:";cin>>book_name1;
-    char c;int flag=0;
-    while(!in.eof()){
-        in.get(c);
-        while(c!='/'){
-            book_name2+=c;
-            in.get(c);
-        }
-        //cout<<book_name2<<endl;
-        //in.get(c);
-        if(book_name1==book_name2){
-            while(c!='.'){
-                other_book_information+=c;
-                in.get(c);
+    int flag=0,n;
+    for(;;){
+        cout<<"ÇëÊäÈë´ý²éÑ¯Î»ÖÃµÄÊé¼®Ãû:";cin>>book_name1;
+        int n;book_date book;
+        while(in.peek()!=EOF){
+            in>>book;
+            if(book.get_book_name()==book_name1){
+                cout<<"ÒÑÕÒµ½"<<endl;flag=1;
+                break;
             }
-            flag=1;
-            cout<<"ÒÑÕÒµ½"<<endl;
-            cout<<setw(10)<<"Í¼ÊéÃû"<<setw(10)<<"×÷Õß"<<setw(10)<<"ÊýÁ¿"<<setw(10)<<"ISBNºÅ"<<setw(10)<<"°æ´Î";
-            cout<<setw(10)<<"³ö°æÉç"<<setw(10)<<"³ö°æÈÕÆÚ"<<setw(10)<<"Àà±ð"<<setw(10)<<"Êé¼ÜÊý"<<setw(10)<<"²ãÊý"<<endl;
-            //cout<<endl;
-            cout<<setw(10)<<book_name1<<" "<<other_book_information<<endl;
-            cin.get();
-            in.close();
-            break;
         }
+        if(flag==1){
+            cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+            cout<<"©§"<<setw(10)<<"ÊéÃû"<<"©§"<<setw(10)<<"×÷Õß"<<"©§"<<setw(10)<<"³ö°æÉç"<<"©§";
+            cout<<setw(10)<<"ISBN"<<"©§"<<setw(10)<<"³ö°æÊ±¼ä"<<"©§"<<setw(10)<<"°æ´Î"<<"©§";
+            cout<<setw(10)<<"ÊýÁ¿"<<"©§"<<setw(10)<<"Àà±ð"<<"©§"<<setw(10)<<"Êé¼ÜÊý"<<"©§";
+            cout<<setw(10)<<"²ãÊý"<<"©§"<<endl;
+            cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+            cout<<"©§"<<setw(10)<<book.get_book_name()<<"©§"<<setw(10)<<book.get_book_author()<<"©§";
+            cout<<setw(10)<<book.get_pubishing_company()<<"©§"<<setw(10)<<book.get_ISBN()<<"©§";
+            cout<<setw(4)<<book.get_publishing_date().get_year()<<"."<<setw(2)<<book.get_publishing_date().get_month();
+            cout<<"."<<setw(2)<<book.get_publishing_date().get_day()<<"©§";
+            cout<<setw(10)<<book.get_order()<<"©§"<<setw(10)<<book.get_amount()<<"©§";
+            cout<<setw(10)<<book.get_classification()<<"©§"<<setw(10)<<book.get_book_shelf()<<"©§";
+            cout<<setw(10)<<book.get_storey()<<"©§"<<endl;
+            cout<<"©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿\n"<<endl;
+        }
+        else{
+            cout<<"ÏµÍ³Î´ÕÒµ½´ËÊé¼®ÐÅÏ¢"<<endl;cin.get();
+        }
+        cout<<"ÊÇ·ñ¼ÌÐø²éÕÒ?"<<endl;
+        cout<<"1 :yes"<<endl;
+        cout<<"0 :no"<<endl;
+        cin>>n;
+        if(n==0)
+            break;
     }
-    if(flag==0){
-        cout<<"ÏµÍ³Î´ÕÒµ½´ËÊé¼®,ÇëÈ·ÈÏÊé¼®ÃûÊÇ·ñÕýÈ·"<<endl;
-    }
-    cout<<"°´ÈÎÒâ¼ü·µ»Ø"<<endl;
+    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
     cin.get();
 }
 void delete_book_infomation()
-{   //ÒÑÍê³É
+{
     system("cls");cin.get();
-    string book_name1,book_name2,othor_book_information;
-    cout<<"ÇëÊäÈëÓûÐÞ¸ÄµÄÊé¼®Ãû³Æ:";cin>>book_name1;
-    ofstream out;ifstream in;
-    in.open("book.txt");
-    if(!in||in.eof()){
-        cerr<<"ÎÄ¼þ²»´æÔÚ»òÎ´Â¼ÈëÈÎºÎÊé¼®ÐÅÏ¢"<<endl;
-        cin.get();
-        return ;
-    }
-    char c;
-    while(in.peek()!=EOF){
-        in.get(c);
-        while(c!='/'){
-            book_name2+=c;
-            in.get(c);
+    string book_name1;
+    book_date book;
+    int m;
+    for(;;){
+        cout<<"ÇëÊäÈëÓûÉ¾³ýµÄÊé¼®Ãû³Æ:";cin>>book_name1;
+        ofstream out;ifstream in;
+        in.open("book.txt");
+        if(!in||in.eof()){
+            cerr<<"ÎÄ¼þ²»´æÔÚ»òÎ´Â¼ÈëÈÎºÎÊé¼®ÐÅÏ¢"<<endl;
+            cin.get();
+            return ;
         }
-        while(c!='.'){
-            othor_book_information+=c;
-            in.get(c);
-        }
-        //cout<<book_name2<<endl;
-        if(book_name1!=book_name2){
-            out.open("book1.txt",ios_base::app);
-            if(!out){
-                cerr<<"ÎÄ¼þ´ò¿ªÊ§°Ü"<<endl;
-                cin.get();
-                return ;
+        int flag=0;int n=0;
+        while(in.peek()!=EOF){
+            in>>book;
+            if(book.get_book_name()==book_name1){
+                flag=1;
+                in.close();break;
             }
-
-            cout<<othor_book_information<<endl;
-            out<<book_name2<<"/"<<othor_book_information<<".\n";
+        }
+        if(flag==1){
+            cout<<"È·ÈÏÉ¾³ýÒÔÏÂÊé¼®µÄËùÓÐÐÅÏ¢?(1:yes   2:no)"<<endl;
+            cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+            cout<<"©§"<<setw(10)<<"ÊéÃû"<<"©§"<<setw(10)<<"×÷Õß"<<"©§"<<setw(10)<<"³ö°æÉç"<<"©§";
+            cout<<setw(10)<<"ISBN"<<"©§"<<setw(10)<<"³ö°æÊ±¼ä"<<"©§"<<setw(10)<<"°æ´Î"<<"©§";
+            cout<<setw(10)<<"ÊýÁ¿"<<"©§"<<setw(10)<<"Àà±ð"<<"©§"<<setw(10)<<"Êé¼ÜÊý"<<"©§";
+            cout<<setw(10)<<"²ãÊý"<<"©§"<<endl;
+            cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+            cout<<"©§"<<setw(10)<<book.get_book_name()<<"©§"<<setw(10)<<book.get_book_author()<<"©§";
+            cout<<setw(10)<<book.get_pubishing_company()<<"©§"<<setw(10)<<book.get_ISBN()<<"©§";
+            cout<<setw(4)<<book.get_publishing_date().get_year()<<"."<<setw(2)<<book.get_publishing_date().get_month();
+            cout<<"."<<setw(2)<<book.get_publishing_date().get_day()<<"©§";
+            cout<<setw(10)<<book.get_order()<<"©§"<<setw(10)<<book.get_amount()<<"©§";
+            cout<<setw(10)<<book.get_classification()<<"©§"<<setw(10)<<book.get_book_shelf()<<"©§";
+            cout<<setw(10)<<book.get_storey()<<"©§"<<endl;
+            cout<<"©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿\n"<<endl;
+            cin>>n;
+        }
+        else{
+            cout<<"ÏµÍ³Î´ÕÒµ½´ËÊé¼®Ïà¹ØÐÅÏ¢,ÎÞ·¨Ö´ÐÐÉ¾³ý²Ù×÷"<<endl;
+            in.close();cin.get();
+        }
+        if(n==1){
+            in.open("book.txt");
+            out.open("book1.txt",ios_base::app);
+            while(in.peek()!=EOF){
+                in>>book;
+                if(book.get_book_name()!=book_name1)
+                    out<<book;
+            }
+            in.close();out.close();
+            out.open("book.txt",ios::trunc);//½«book1.txtÖÐµÄÄÚÈÝ¡°¸´ÖÆ¡±µ½book.txt
+            in.open("book1.txt");
+            char c;
+            while(in.peek()!=EOF){
+                in.get(c);
+                out<<c;
+            }
             out.close();
+            in.close();
+            out.open("book1.txt",ios::trunc);
+            out.close();//Çå¿Õbook1.txtÎÄ¼þµÄÄÚÈÝ
+            cout<<"É¾³ý³É¹¦"<<endl;
+            cin.get();
+        }
+        cout<<"ÊÇ·ñ¼ÌÐøÉ¾³ý?(1:yes   0:no)"<<endl;
+        cin>>m;
+        if(m==0)
+            break;
+    }
+    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
+    cin.get();
+}
+void borrow_book(people &person)
+{
+    system("cls");cin.get();
+    system("title ½èÔÄÊé¼®");
+    ifstream in;ofstream out;
+    people person1;
+    int brbook_number;//½èÔÄÊé¼®±¾Êý
+    in.open("brbook.txt");int flag1=0;
+    while(in.peek()!=EOF){
+        in>>person1;
+        if(person1.get_name()==person.get_name()){
+            flag1=1;break;
         }
     }
     in.close();
+    if(flag1==1){
+        cout<<"ÓÉÓÚÄã»¹ÓÐ"<<person1.get_number()<<"±¾ÊéÎ´¹é»¹"<<endl;
+        cout<<"¹ÊÄãÏÖÔÚÖ»ÄÜ×î¶à½èÔÄ"<<10-person1.get_number()<<"±¾Êé"<<endl;
+        for(;;){
+            cout<<"ÇëÊäÈë½èÔÄ±¾Êý:";cin>>brbook_number;
+            if(brbook_number>10-person1.get_number()||brbook_number<=0)
+                cout<<"ÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+        }
+    }
+    else{
+        for(;;){
+            cout<<"ÇëÊäÈë½èÔÄ±¾Êý(×î¶à½èÔÄÊ®±¾):";cin>>brbook_number;
+            if(brbook_number>10||brbook_number<=0)
+                cout<<"ÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
+            else
+                break;
+        }
+    }
+    string book[10];
+    int i;
+    for(i=0;i<brbook_number;i++){
+        cout<<"ÇëÊäÈëµÚ"<<i+1<<"±¾ÊéÊéÃû:";
+        cin>>book[i];
+    }
+    int n=0,flag;
+    book_date book1,book2[10];//¼ì²âÊÇ·ñ´æÔÚ´ËÊé¼®ÐÅÏ¢
+    for(i=0;i<brbook_number;i++){
+        flag=0;
+        in.open("book.txt");
+        while(in.peek()!=EOF){
+            in>>book1;
+            if(book1.get_book_name()==book[i]){
+                in.close();book2[n]=book1;flag=1;++n;break;
+            }
+        }
+        if(flag==0){
+            in.close();
+            cout<<"ÏµÍ³Î´ÕÒµ½´ËÊé¼®,´ËÊé¼®Î´ÊÕÂ¼"<<endl;
+            cin.get();
+        }
+    }
+    brbook_number=n;
+    for(i=0;i<n;i++)
+        book[i]=book2[i].get_book_name();
+    cout<<"È·ÈÏ½èÔÄÒÔÏÂÊé¼®?(1:yes   2:no)"<<endl;
+    int m;
+    cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+    cout<<"©§"<<setw(10)<<"ÊéÃû"<<"©§"<<setw(10)<<"×÷Õß"<<"©§"<<setw(10)<<"³ö°æÉç"<<"©§";
+    cout<<setw(10)<<"ISBN"<<"©§"<<setw(10)<<"³ö°æÊ±¼ä"<<"©§"<<setw(10)<<"°æ´Î"<<"©§";
+    cout<<setw(10)<<"ÊýÁ¿"<<"©§"<<setw(10)<<"Àà±ð"<<"©§"<<setw(10)<<"Êé¼ÜÊý"<<"©§";
+    cout<<setw(10)<<"²ãÊý"<<"©§"<<endl;
+    for(i=0;i<brbook_number;i++){
+        cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+        cout<<"©§"<<setw(10)<<book2[i].get_book_name()<<"©§"<<setw(10)<<book2[i].get_book_author()<<"©§";
+        cout<<setw(10)<<book2[i].get_pubishing_company()<<"©§"<<setw(10)<<book2[i].get_ISBN()<<"©§";
+        cout<<setw(4)<<book2[i].get_publishing_date().get_year()<<"."<<setw(2)<<book2[i].get_publishing_date().get_month();
+        cout<<"."<<setw(2)<<book2[i].get_publishing_date().get_day()<<"©§";
+        cout<<setw(10)<<book2[i].get_order()<<"©§"<<setw(10)<<book2[i].get_amount()<<"©§";
+        cout<<setw(10)<<book2[i].get_classification()<<"©§"<<setw(10)<<book2[i].get_book_shelf()<<"©§";
+        cout<<setw(10)<<book2[i].get_storey()<<"©§"<<endl;
+    }
+    cout<<"©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿\n"<<endl;
+    cin>>m;
+    if(m==1){
+        people person2;int flag2=0;
+        in.open("brbook.txt");
+        while(in.peek()!=EOF){
+            in>>person2;flag2=0;
+            if(person2.get_name()==person.get_name()){
+                int j;
+                for(j=0;j<person2.get_number();j++){
+                    book[n]=person2.get_book_name(j);n++;
+                }
+                flag2=1;
+            }
+            if(flag2==1)
+                break;
+        }
+        in.close();
+        person.set_bbook_information(n,book);//Èç¹ûÓÃ»§²»´æÔÚÎ´¹é»¹µÄÊé¼®ÐÅÏ¢
+        if(flag2==1){
+            out.open("brbook.txt",ios_base::app);
+            out<<person;
+            out.close();
+        }//Èç¹ûÓÃ»§´æÔÚÎ´¹é»¹µÄÊé¼®ÐÅÏ¢
+        else{
+            in.open("brbook.txt");
+            out.open("brbook1.txt",ios_base::app);
+            while(in.peek()!=EOF){
+                in>>person2;
+                if(person2.get_name()==person.get_name())
+                    out<<person;
+                else
+                    out<<person2;
+            }
+            in.close();out.close();
+            char c;
+            out.open("brbook.txt",ios::trunc);
+            in.open("brbook1.txt");
+            while(in.peek()!=EOF){
+                in.get(c);
+                out<<c;
+            }
+            out.close();
+            in.close();
+            out.open("brbook1.txt",ios::trunc);
+            out.close();//½«brbook1ÎÄ¼þµÄÄÚÈÝÇå¿Õ
+        }
+        cout<<"½èÔÄ³É¹¦"<<endl;
+        for(i=0;i<brbook_number;i++){//½«½èÔÄµÄÊé¼®ÊýÁ¿¼õ1
+            in.open("book.txt");
+            out.open("book1.txt",ios_base::app);
+            while(in.peek()!=EOF){
+                in>>book1;
+                if(book1.get_book_name()==book[i])
+                    out<<book1;
+                else{
+                    book1.low_amount();
+                    out<<book1;
+                }
+            }
+        }
+        in.close();out.close();
+        char c;
+        out.open("book.txt",ios::trunc);
+        in.open("book1.txt");
+        while(in.peek()!=EOF){
+            in.get(c);
+            out<<c;
+        }
+        out.close();
+        in.close();
+        out.open("book1.txt",ios::trunc);
+        out.close();//½«book1ÎÄ¼þµÄÄÚÈÝÇå¿Õ
+    }
+    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
+    cin.get();
+}
+void return_book(people &person)
+{
+    system("cls");cin.get();
+    system("title ¹é»¹Êé¼®");
+    int rbook_number;ifstream in;
+    ofstream out;
+    book_date book1;
+    cout<<"ÇëÊäÈë¹é»¹µÄÊé¼®×ÜÊý(²»³¬¹ý½èÔÄÊé¼®µÄ×ÜÊý):";
+    cin>>rbook_number;
+    string book[10];
+    int i;
+    for(i=0;i<rbook_number;i++){
+        cout<<"ÇëÊäÈëÄã¹é»¹µÄµÚ"<<i+1<<"±¾ÊéÊéÃû:";
+        cin>>book[i];
+    }
+    int n=0;
+    people person1;//¼ì²éÊÇ·ñÊÇÎ´¹é»¹µÄÊé¼®
+    for(i=0;i<rbook_number;i++){
+        in.open("brbook.txt");int flag=0;
+        while(in.peek()!=EOF){
+            cin>>person1;
+            if(person1.get_name()==person.get_name()){
+                int j;
+                for(j=0;j<person1.get_number();j++){
+                    if(person1.get_book_name(j)==book[i]){
+                        flag=1;n++;break;
+                    }
+                }
+                if(flag==1){
+                    in.close();break;
+                }
+                else{
+                    cout<<"ÄãÎ´½èÔÄ"<<book[i]<<"´ËÊé¼®"<<endl;
+                    cin.get();in.close();break;
+                }
+            }
+        }
+    }
+    rbook_number==n;
+    out.open("rbook.txt");
+    person.set_rbook_information(rbook_number,book);
+    out<<person;
+    out.close();
+    cout<<"¹é»¹³É¹¦"<<endl;
+    for(i=0;i<rbook_number;i++){//½«¹é»¹µÄÊé¼®ÊýÁ¿¼Ó1
+        in.open("book.txt");
+        out.open("book1.txt",ios_base::app);
+        while(in.peek()!=EOF){
+            in>>book1;
+            if(book1.get_book_name()==book[i])
+                out<<book1;
+            else{
+                book1.low_amount();
+                out<<book1;
+            }
+        }
+    }
+    in.close();out.close();
+    char c;
     out.open("book.txt",ios::trunc);
     in.open("book1.txt");
     while(in.peek()!=EOF){
@@ -804,118 +1324,554 @@ void delete_book_infomation()
     out.close();
     in.close();
     out.open("book1.txt",ios::trunc);
-    out.close();//Çå¿Õbook1.txtÎÄ¼þµÄÄÚÈÝ
-    cout<<"É¾³ý³É¹¦"<<endl;
-    cin.get();
-    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
-    cin.get();
-}
-void borrow_book()
-{   system("cls");cin.get();
-    cout<<"´Ë¹¦ÄÜÔÝÎ´ÊµÏÖ"<<endl;
-    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
-    cin.get();
-}
-void return_book()
-{   system("cls");cin.get();
-    cout<<"´Ë¹¦ÄÜÔÝÎ´ÊµÏÖ"<<endl;
-    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
-    cin.get();
-}
-void count_book_information()
-{   system("cls");cin.get();
-    cout<<"´Ë¹¦ÄÜÔÝÎ´ÊµÏÖ"<<endl;
-    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
-    cin.get();
-}
-void check_borrow_information()
-{   system("cls");cin.get();
-    cout<<"´Ë¹¦ÄÜÔÝÎ´ÊµÏÖ"<<endl;
-    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
-    cin.get();
-}
-void revise_password(string s)
-{   //ÒÑÍê³É
-    system("cls");cin.get();
-    ifstream in;ofstream out;
-    string student_id1,password1,password2,password3,password4;
-    in.open("password.txt");
-    out.open("password1.txt",ios_base::app);
-    char c;
+    out.close();//½«book1ÎÄ¼þµÄÄÚÈÝÇå¿Õ
+    in.open("brbook.txt");//¸ü¸Äbrbook.txtµÄ½èÊéÐÅÏ¢
+    out.open("brbook1.txt",ios_base::app);
+    int j,k=0;string book3[10];
     while(in.peek()!=EOF){
-        in.get(c);
-        while(c!='/'){
-            student_id1+=c;
-            in.get(c);
-        }
-        in.get(c);
-        while(c!='\n'){
-            password1+=c;
-            in.get(c);
-        }
-        //cout<<password1<<endl;
-        int i;int flag=0;int n;
-        if(student_id1==s){
-            for(i=0;i<3;i++){
-                 cout<<"ÇëÊäÈëÔ­ÃÜÂë:";cin>>password2;
-                 if(password2==password1){
-                    for(;;){
-                        cout<<"ÇëÊäÈëÐÂÃÜÂë:";cin>>password3;
-                        cout<<"ÇëÈ·ÈÏÐÂÃÜÂë:";cin>>password4;
-                        if(password3==password4){
-                            flag=1;break;
-                        }
-                        else{
-                            cout<<"Á½´ÎÊäÈëÄÚÈÝ²»ÏàÍ¬,ÇëÖØÐÂÊäÈë"<<endl;
-                        }
+        in>>person1;
+        if(person1.get_name()==person.get_name()){
+            for(i=0;i<person1.get_number();i++){
+                int flag=0;
+                for(j=0;j<person.get_number();j++){
+                    if(person1.get_book_name(i)==person.get_book_name(j)){
+                        flag=1;break;
                     }
-                 }
-                 else{
-                    cout<<"ÃÜÂë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
-                 }
-                 if(flag==1)
-                    break;
-            }
-            if(i==3){
-                cout<<"ÄãÒÑÁ¬ÐøÈý´ÎÊäÈë´íÎóÃÜÂë,ÃÜÂëÐÞ¸Ä¹¦ÄÜ¼´½«ÍË³ö"<<endl;
-                return;
-            }
-            else{
-                cout<<"ÄãÈ·ÈÏ½«ÃÜÂëÐÞ¸ÄÎª:"<<password4<<"?(1(yes)/0(no))";cin>>n;
-                if(n==1){
-                    out<<student_id1<<"/"<<password4<<"\n";
                 }
-                else{
-                    cout<<"¸ÐÐ»ÄãÊ¹ÓÃ±¾¹¦ÄÜ"<<endl;
-                    return;
+                if(flag==0){
+                    book3[k]=person1.get_book_name(i);k++;
                 }
+            }//Èç¹ûÎ´È«²¿¹é»¹
+            if(k>0){
+                person1.revise_brbook_infomation(k,book3);
+                out<<person1;
             }
         }
         else{
-            out<<student_id1<<"/"<<password1<<".\n";
+            out<<person1;
         }
     }
-    in.close();
-    out.close();
-    out.open("password.txt",ios::trunc);
-    in.open("password1.txt");
+    in.close();out.close();
+    out.open("brbook.txt",ios::trunc);
+    in.open("brbook1.txt");
     while(in.peek()!=EOF){
         in.get(c);
         out<<c;
     }
     out.close();
     in.close();
-    out.open("password1.txt",ios::trunc);
-    out.close();//½«password1ÎÄ¼þµÄÄÚÈÝÇå¿Õ
-    cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+    out.open("brbook1.txt",ios::trunc);
+    out.close();//½«brbook1.txtÎÄ¼þµÄÄÚÈÝÇå¿Õ
+    cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
     cin.get();
+}
+void count_book_information()
+{   system("cls");cin.get();
+    system("title Í³¼ÆÊé¼®ÐÅÏ¢");
+    ifstream in;int n,m;
+    for(;;){
+        cout<<"\t\t\t\t©°©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©´\n";
+        cout<<"\t\t\t\t©¦         Í¼Êé¹ÜÀí½èÔÄÏµÍ³         ©¦\n";
+        cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+        cout<<"\t\t\t\t©¦         1   Í³¼Æ×Ü²ØÊé           ©¦\n";
+        cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+        cout<<"\t\t\t\t©¦         2   Í³¼ÆÀà±ð         ©¦\n";
+    }
+    cin.get();
+}
+void check_borrow_return_information()
+{
+    system("cls");cin.get();
+    system("title ²éÑ¯½èÔÄÐÅÏ¢");
+    people person;int i;
+    ifstream in;int n,m;//m±íÊ¾Ñ¡Ñ¡Ïî,n±íÊ¾ÊÇ·ñ¼ÌÐø
+    for(;;){
+        cout<<"\t\t\t\t©°©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©´\n";
+        cout<<"\t\t\t\t©¦              ²éÕÒÑ¡Ïî            ©¦\n";
+        cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+        cout<<"\t\t\t\t©¦        1   °´½èÔÄÈË²éÑ¯          ©¦\n";
+        cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+        cout<<"\t\t\t\t©¦        2   °´½èÔÄÊé¼®²éÑ¯        ©¦\n";
+        cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+        cout<<"\t\t\t\t©¦        3   °´½èÔÄÊ±¼ä²éÑ¯        ©¦\n";
+        cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+        cout<<"\t\t\t\t©¦        4   °´ÊÇ·ñ¹é»¹²éÑ¯        ©¦\n";
+        cout<<"\t\t\t\t©¸©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¼\n";
+        cin>>m;
+        if(m==1){
+            system("cls");
+            string brbook_name;
+            cout<<"ÇëÊäÈë½èÔÄÈËµÄÐÕÃû:"<<endl;cin>>brbook_name;
+            in.open("brbook.txt");
+            int flag=0;
+            while(in.peek()!=EOF){
+                in>>person;
+                if(person.get_name()==brbook_name){
+                    flag=1;break;
+                }
+            }
+            in.close();
+            int flag1=0;
+            if(flag==0){
+                in.open("rbook.txt");
+                while(in.peek()!=EOF){
+                    in>>person;
+                    if(person.get_name()==brbook_name){
+                        flag1=1;break;
+                    }
+                }
+            }
+            in.close();
+            if(flag==0&&flag1==0){
+                cout<<"ÎÞ´ËÈËµÄÈÎºÎ½èÔÄÐÅÏ¢"<<endl;
+            }
+            else{
+                in.open("brbook.txt");
+                cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+                cout<<"©§"<<setw(10)<<"ÐÕÃû"<<"©§"<<setw(10)<<"½èÊéÊéÃû"<<"©§"<<setw(10)<<"½èÔÄÊ±¼ä"<<"©§";
+                cout<<setw(10)<<"¹é»¹Ê±¼ä"<<"©§"<<setw(10)<<"ÊÇ·ñ¹é»¹"<<"©§"<<endl;
+                while(in.peek()!=EOF){
+                    in>>person;
+                    if(person.get_name()==brbook_name){
+                        cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+                        cout<<"©§"<<setw(10)<<person.get_name()<<"©§"<<setw(10)<<person.get_book_name(0);
+                        cout<<"©§"<<setw(4)<<person.get_brtime().get_year()<<"."<<setw(2)<<person.get_brtime().get_month();
+                        cout<<"."<<setw(2)<<person.get_brtime().get_day()<<"©§"<<setw(10)<<" "<<"©§";
+                        cout<<setw(10)<<"Î´¹é»¹"<<"©§"<<endl;
+                        for(i=1;i<person.get_number();i++){
+                            cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<person.get_book_name(i);
+                            cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<" "<<"©§"<<endl;
+                        }
+                    }
+                }
+                in.close();
+                in.open("rbook.txt");
+                while(in.peek()!=EOF){
+                    in>>person;
+                    if(person.get_name()==brbook_name){
+                        cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+                        cout<<"©§"<<setw(10)<<person.get_name()<<"©§"<<setw(10)<<person.get_book_name(0);
+                        cout<<"©§"<<setw(4)<<person.get_brtime().get_year()<<"."<<setw(2)<<person.get_brtime().get_month();
+              cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+                cout<<"©§"<<setw(10)<<"ÐÕÃû"<<"©§"<<setw(10)<<"½èÊéÊéÃû"<<"©§"<<setw(10)<<"½èÔÄÊ±¼ä"<<"©§";
+                cout<<setw(10)<<"¹é»¹Ê±¼ä"<<"©§"<<setw(10)<<"ÊÇ·ñ¹é»¹"<<"©§"<<endl;          cout<<"."<<setw(2)<<person.get_brtime().get_day()<<"©§";
+                        cout<<setw(4)<<person.get_rtime().get_year()<<"."<<setw(2)<<person.get_rtime().get_month();
+                        cout<<"."<<setw(2)<<person.get_rtime().get_day()<"©§";
+                        cout<<setw(10)<<"ÒÑ¹é»¹"<<"©§"<<endl;
+                        for(i=1;i<person.get_number();i++){
+                            cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<person.get_book_name(i);
+                            cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<" "<<"©§"<<endl;
+                        }
+                    }
+                }
+                in.close();
+                cout<<"©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿"<<endl;
+            }
+        }//°´½èÔÄÊé¼®²éÑ¯
+        else if(m==2){
+            system("cls");
+            string book_name1;
+            people person;int i;
+            cout<<"ÇëÊäÈëÐèÒª²éÑ¯µÄÊé¼®Ãû³Æ:";cin>>book_name1;
+            in.open("brbook.txt");
+            int flag=0;
+            while(in.peek()!=EOF){
+                in>>person;
+                if(person.get_name()==book_name1){
+                    flag=1;break;
+                }
+            }
+            in.close();
+            int flag1=0;
+            if(flag==0){
+                in.open("rbook.txt");
+                while(in.peek()!=EOF){
+                    in>>person;
+                    if(person.get_name()==book_name1){
+                        flag1=1;break;
+                    }
+                }
+            }
+            in.close();int flag2;
+            if(flag==0&&flag1==0){
+                cout<<"ÎÞ´ËÊé¼®µÄÈÎºÎ½èÔÄÐÅÏ¢"<<endl;
+            }
+            else{
+                cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+                cout<<"©§"<<setw(10)<<"½èÔÄÈË"<<"©§"<<setw(10)<<"½èÔÄÊ±¼ä"<<"©§";
+                cout<<setw(10)<<"¹é»¹Ê±¼ä"<<"©§"<<setw(10)<<"ÊÇ·ñ¹é»¹"<<"©§"<<endl;
+                in.open("brbook.txt");
+                while(in.peek()!=EOF){
+                    in>>person;flag2=0;
+                    for(i=0;i<person.get_number();i++){
+                        if(person.get_book_name(i)==book_name1){
+                            flag2=1;break;
+                        }
+                    }
+                    if(flag2==1){
+                        cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+                        cout<<"©§"<<setw(10)<<person.get_name()<<"©§"<<setw(4)<<person.get_brtime().get_year();
+                        cout<<"."<<setw(2)<<person.get_brtime().get_month()<<".";
+                        cout<<setw(2)<<person.get_brtime().get_day()<<"©§"<<setw(10)<<" "<<"©§";
+                        cout<<setw(10)<<"Î´¹é»¹"<<endl;
+                    }
+                }
+                in.close();
+                in.open("rbook.txt");
+                while(in.peek()!=EOF){
+                    in>>person;flag2=0;
+                    for(i=0;i<person.get_number();i++){
+                        if(person.get_book_name(i)==book_name1){
+                            flag2=1;break;
+                        }
+                    }
+                    if(flag2==1){
+                        cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+                        cout<<"©§"<<setw(10)<<person.get_name()<<"©§"<<setw(4)<<person.get_brtime().get_year();
+                        cout<<"."<<setw(2)<<person.get_brtime().get_month()<<".";
+                        cout<<setw(2)<<person.get_brtime().get_day()<<"©§";
+                        cout<<setw(4)<<person.get_rtime().get_year()<<"."<<setw(2)<<person.get_rtime().get_month();
+                        cout<<"."<<setw(2)<<person.get_rtime().get_day()<<"©§"<<setw(10)<<"ÒÑ¹é»¹"<<"©§"<<endl;
+                    }
+                }
+                in.close();
+                cout<<"©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿"<<endl;
+            }
+        }
+        else if(m==3){
+            system("cls");
+            int year1,month1,day1,year2,month2,day2;
+            for(;;){
+                cout<<"ÇëÊäÈë²éÑ¯µÄÆðÊ¼Ê±¼ä(°´ÄêÔÂÈÕÒÀ´ÎÊäÈë,ÖÐ¼äÓÃ¿Õ¸ñ·Ö¿ª):";
+                cin>>year1>>month1>>day1;
+                if(!check_time(year1,month1,day1))
+                    cout<<"ÈÕÆÚÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
+                else
+                    break;
+            }
+            for(;;){
+                cout<<"ÇëÊäÈë²éÑ¯µÄ½ØÖ¹Ê±¼ä(°´ÄêÔÂÈÕÒÀ´ÎÊäÈë,ÖÐ¼äÓÃ¿Õ¸ñ·Ö¿ª):";
+                cin>>year2>>month2>>day2;
+                if(!check_time(year2,month2,day2))
+                    cout<<"ÈÕÆÚÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
+                else
+                    break;
+            }
+            Time time1,time2;
+            time1.set_time(year1,month1,day1);
+            time2.set_time(year2,month2,day2);
+            int time_date=time2-time1;
+            in.open("brbook.txt");
+            int flag=0;
+            while(in.peek()!=EOF){
+                in>>person;
+                Time time3=person.get_brtime();
+                int time_date2=time3-time1;
+                if(time_date2<=time_date){
+                    flag=1;break;
+                }
+            }
+            in.close();
+            int flag1=0;
+            if(flag==0){
+                in.open("rbook.txt");
+                while(in.peek()!=EOF){
+                    in>>person;
+                    Time time3=person.get_brtime();
+                    int time_date2=time3-time1;
+                    if(time_date2<=time_date){
+                        flag1=1;break;
+                    }
+                }
+            }
+            in.close();
+            if(flag==0&&flag1==0){
+                cout<<"´ËÊ±¼ä¶ÎÈÎºÎ½èÔÄÐÅÏ¢"<<endl;
+            }
+            else{
+                in.open("brbook.txt");
+                cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+                cout<<"©§"<<setw(10)<<"ÐÕÃû"<<"©§"<<setw(10)<<"½èÊéÊéÃû"<<"©§"<<setw(10)<<"½èÔÄÊ±¼ä"<<"©§";
+                cout<<setw(10)<<"¹é»¹Ê±¼ä"<<"©§"<<setw(10)<<"ÊÇ·ñ¹é»¹"<<"©§"<<endl;
+                while(in.peek()!=EOF){
+                    in>>person;
+                    Time time3=person.get_brtime();
+                    int time_date1=time3-time1;
+                    if(time_date1<=time_date){
+                        cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+                        cout<<"©§"<<setw(10)<<person.get_name()<<"©§"<<setw(10)<<person.get_book_name(0);
+                        cout<<"©§"<<setw(4)<<person.get_brtime().get_year()<<"."<<setw(2)<<person.get_brtime().get_month();
+                        cout<<"."<<setw(2)<<person.get_brtime().get_day()<<"©§"<<setw(10)<<" "<<"©§";
+                        cout<<setw(10)<<"Î´¹é»¹"<<"©§"<<endl;
+                        for(i=1;i<person.get_number();i++){
+                            cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<person.get_book_name(i);
+                            cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<" "<<"©§"<<endl;
+                        }
+                    }
+                }
+                in.close();
+                in.open("rbook.txt");
+                while(in.peek()!=EOF){
+                    in>>person;
+                    Time time3=person.get_brtime();
+                    int time_date1=time3-time1;
+                    if(time_date1<=time_date){
+                        cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+                        cout<<"©§"<<setw(10)<<person.get_name()<<"©§"<<setw(10)<<person.get_book_name(0);
+                        cout<<"©§"<<setw(4)<<person.get_brtime().get_year()<<"."<<setw(2)<<person.get_brtime().get_month();
+                        cout<<"."<<setw(2)<<person.get_brtime().get_day()<<"©§";
+                        cout<<setw(4)<<person.get_rtime().get_year()<<"."<<setw(2)<<person.get_rtime().get_month();
+                        cout<<"."<<setw(2)<<person.get_rtime().get_day()<"©§";
+                        cout<<setw(10)<<"ÒÑ¹é»¹"<<"©§"<<endl;
+                        for(i=1;i<person.get_number();i++){
+                            cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<person.get_book_name(i);
+                            cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<" "<<"©§"<<endl;
+                        }
+                    }
+                }
+                in.close();
+                cout<<"©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿"<<endl;
+            }
+        }
+        else if(m==4){
+            system("cls");
+            in.open("rbook.txt");
+            if(!in||in.eof()){
+                cout<<"ÎÞÈÎºÎ½èÔÄÐÅÏ¢"<<endl;
+                cin.get();
+            }
+            else{
+                cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+                cout<<"©§"<<setw(10)<<"ÐÕÃû"<<"©§"<<setw(10)<<"½èÊéÊéÃû"<<"©§"<<setw(10)<<"½èÔÄÊ±¼ä"<<"©§"<<endl;
+                while(in.peek()!=EOF){
+                    in>>person;
+                    cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+                    cout<<"©§"<<setw(10)<<person.get_name()<<"©§"<<setw(10)<<person.get_book_name(0);
+                    cout<<"©§"<<setw(4)<<person.get_brtime().get_year()<<"."<<setw(2)<<person.get_brtime().get_month();
+                    cout<<"."<<setw(2)<<person.get_brtime().get_day()<<"©§"<<endl;
+                    for(i=1;i<person.get_number();i++){
+                        cout<<"©§"<<setw(10)<<" "<<"©§"<<setw(10)<<person.get_book_name(i);
+                        cout<<setw(10)<<" "<<"©§"<<endl;
+                    }
+                }
+                in.close();
+                cout<<"©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿"<<endl;
+            }
+        }
+        else{
+            cout<<"Ñ¡Ôñ´íÎó"<<endl;cin.get();
+        }
+        cout<<"ÊÇ·ñ¼ÌÐø²éÑ¯?(1:yes   0:no)"<<endl;
+        cin>>n;
+        if(n==0)
+            break;
+    }
+    cin.get();
+}
+void revise_password(people &person)
+{
+    system("cls");cin.get();
+    system("title ÐÞ¸ÄÃÜÂë");
+    string password1,id,password2,password3,password4;
+    ifstream in;ofstream out;
+    in.open("password.txt");
+    while(in.peek()!=EOF){
+        in>>id>>password2;
+        if(id==person.get_id()){
+            in.close();break;
+        }
+    }
+    int i;
+    for(i=0;i<3;i++){
+        cout<<"ÇëÊäÈëÔ­ÃÜÂë:";
+        char s[21];int j=0;
+        while((s[j]=getch())!=13&&j!=20){
+            putch('*');
+            j++;
+        }
+        s[j]='\0';
+        password1=s;
+        int n;
+        if(password1==password2){
+            for(;;){
+                for(;;){
+                    cout<<"ÇëÊäÈëÐÂÃÜÂë:";
+                    char s[21];int j=0;
+                    while((s[j]=getch())!=13&&j!=20){
+                        putch('*');
+                        j++;
+                    }
+                    s[j]='\0';
+                    password3=s;
+                }
+                for(;;){
+                    cout<<"ÇëÔÙ´ÎÈ·ÈÏÐÂÃÜÂë:";
+                    char s[21];int j=0;
+                    while((s[j]=getch())!=13&&j!=20){
+                        putch('*');
+                        j++;
+                    }
+                    s[j]='\0';
+                    password4=s;
+                }
+                if(password3==password4)
+                    break;
+                else{
+                    cout<<"Á½´ÎÃÜÂë²»Í¬,ÇëÖØÐÂÊäÈë"<<endl;
+                }
+            }
+            cout<<"È·ÈÏ½«ÃÜÂëÐÞ¸ÄÎª:"<<password3<<"?(1:yes   2:no)"<<endl;
+            cin>>n;
+            if(n==1){
+                in.open("password.txt");
+                out.open("password1.txt",ios_base::app);
+                while(in.peek()!=EOF){
+                    in>>id>>password1;
+                    if(id==person.get_id())
+                        out<<id<<" "<<password3<<"\n";
+                    else
+                        out<<id<<" "<<password1<<"\n";
+                }
+                in.close();
+                out.close();//½«password1.txtÎÄ¼þÖÐµÄÄÚÈÝ¸º¡°¸´ÖÆ¡±µ½password.txt
+                out.open("password.txt",ios::trunc);
+                in.open("password1.txt");
+                char c;
+                while(in.peek()!=EOF){
+                    in.get(c);
+                    out<<c;
+                }
+                out.close();
+                in.close();
+                out.open("password1.txt",ios::trunc);
+                out.close();//½«password1ÎÄ¼þµÄÄÚÈÝÇå¿Õ
+            }
+        }
+        else{
+            if(i<2)
+                cout<<"Ô­ÃÜÂëÊäÈë´íÎó,ÇëÖØÐÂÊäÈë"<<endl;
+        }
+    }
+    if(i==3){
+        cout<<"ÄãÒÑÁ¬ÐøÈý´ÎÊäÈëÃÜÂë´íÎó,²»ÄÜ¼ÌÐøÐÞ¸ÄÃÜÂë"<<endl;
+    }
+    else
+        cout<<"ÃÜÂëÐÞ¸Ä³É¹¦"<<endl;
     cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
     cin.get();
 }
 void revise_book_information()
 {
     system("cls");cin.get();
-    cout<<"´Ë¹¦ÄÜÔÝÎ´ÊµÏÖ"<<endl;
+    system("title ÐÞ¸ÄÊé¼®ÐÅÏ¢");
+    ifstream in,ine;ofstream out;
+    int n;
+    string book_name1;
+    book_date book;
+    for(;;){
+        system("cls");
+        cout<<"ÇëÊäÈëÄãÏëÐÞ¸ÄÐÅÏ¢µÄÊé¼®Ãû:";cin>>book_name1;
+        ine.open("book.txt");int flag=0;
+        while(ine.peek()!=EOF){
+            ine>>book;
+            if(book.get_book_name()==book_name1){
+                flag=1;ine.close();break;
+            }
+        }
+        int m,choice;
+        if(flag==1){
+            cout<<"È·ÈÏÐÞ¸ÄÒÔÏÂÊé¼®µÄÏà¹ØÐÅÏ¢?(1:yes  0:no)"<<endl;
+            cout<<"©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©×©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·"<<endl;
+            cout<<"©§"<<setw(10)<<"ÊéÃû"<<"©§"<<setw(10)<<"×÷Õß"<<"©§"<<setw(10)<<"³ö°æÉç"<<"©§";
+            cout<<setw(10)<<"ISBN"<<"©§"<<setw(10)<<"³ö°æÊ±¼ä"<<"©§"<<setw(10)<<"°æ´Î"<<"©§";
+            cout<<setw(10)<<"ÊýÁ¿"<<"©§"<<setw(10)<<"Àà±ð"<<"©§"<<setw(10)<<"Êé¼ÜÊý"<<"©§";
+            cout<<setw(10)<<"²ãÊý"<<"©§"<<endl;
+            cout<<"©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ï©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï"<<endl;
+            cout<<"©§"<<setw(10)<<book.get_book_name()<<"©§"<<setw(10)<<book.get_book_author()<<"©§";
+            cout<<setw(10)<<book.get_pubishing_company()<<"©§"<<setw(10)<<book.get_ISBN()<<"©§";
+            cout<<setw(4)<<book.get_publishing_date().get_year()<<"."<<setw(2)<<book.get_publishing_date().get_month();
+            cout<<"."<<setw(2)<<book.get_publishing_date().get_day()<<"©§";
+            cout<<setw(10)<<book.get_order()<<"©§"<<setw(10)<<book.get_amount()<<"©§";
+            cout<<setw(10)<<book.get_classification()<<"©§"<<setw(10)<<book.get_book_shelf()<<"©§";
+            cout<<setw(10)<<book.get_storey()<<"©§"<<endl;
+            cout<<"©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©ß©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿\n"<<endl;
+            cin>>m;
+            if(m==1){
+                system("cls");
+                cout<<"\t\t\t\t©°©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©´\n";
+                cout<<"\t\t\t\t©¦      ÇëÑ¡ÔñÄãÏëÒªÐÞ¸ÄµÄÄÚÈÝ      ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              1   ÊéÃû            ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              2   ×÷Õß            ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              3   ISBNºÅ          ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              4   ³ö°æÉç          ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              5   ³ö°æÊ±¼ä        ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              6   °æ´Î            ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              7   ÊýÁ¿            ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              8   Àà±ð            ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              9   Êé¼ÜÊý          ©¦\n";
+                cout<<"\t\t\t\t©À©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©È\n";
+                cout<<"\t\t\t\t©¦              10  ²ãÊý            ©¦\n";
+                cout<<"\t\t\t\t©¸©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¼\n";
+                cin>>choice;
+                switch(n){
+                    case 1:book.revise_name();
+                    case 2:book.revise_author();
+                    case 3:book.revise_ISBN();
+                    case 4:book.revise_publishing_company();
+                    case 5:book.revise_publishing_date();
+                    case 6:book.revise_order();
+                    case 7:book.revise_amount();
+                    case 8:book.revise_classification();
+                    case 9:book.revise_book_shelf();
+                    case 10:book.revise_storey();
+                    default:cout<<"Ñ¡Ôñ´íÎó"<<endl;break;
+                }
+                in.open("book.txt");
+                book_date book1;
+                out.open("book1.txt",ios_base::app);
+                while(in.peek()!=EOF){
+                    cin>>book1;
+                    if(book1.get_book_name()!=book.get_book_name())
+                        out<<book1;
+                    else
+                        out<<book;
+                }
+                in.close();
+                out.close();
+                out.open("book.txt",ios::trunc);
+                in.open("book1.txt");
+                char c;
+                while(in.peek()!=EOF){
+                    in.get(c);
+                    out<<c;
+                }
+                out.close();
+                in.close();
+                out.open("book1.txt",ios::trunc);
+                out.close();//½«password1ÎÄ¼þµÄÄÚÈÝÇå¿Õ
+                cout<<"ÐÞ¸Ä³É¹¦"<<endl;
+                cin.get();
+            }
+        }
+        else{
+            ine.close();
+            cout<<"Î´ÕÒµ½´ËÊé¼®ÐÅÏ¢"<<endl;
+            cout<<"ÇëÈ·ÈÏÊé¼®ÐÅÏ¢ÊÇ·ñÊäÈëÕýÈ·"<<endl;cin.get();
+        }
+        cout<<"ÊÇ·ñ¼ÌÐøÐÞ¸Ä?(1:yes   2:no)"<<endl;
+        cin>>n;
+        if(n==0)
+            break;
+    }
     cout<<"°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥"<<endl;
     cin.get();
 }
