@@ -4,6 +4,7 @@
 #include<fstream>
 #include<iomanip>
 #include<conio.h>
+#include<map>
 using namespace std;
 bool check_time(int y,int m,int d)
 {
@@ -628,9 +629,9 @@ public:
     }
     friend ostream &operator<<(ostream &out,const borrow_return_book &p)
     {
-        return p.read(out);
+        return p.print(out);
     }
-    virtual ostream &read(ostream &out)const
+    virtual ostream &print(ostream &out)const
     {
         int i;
         for(i=0;i<number;i++)
@@ -666,13 +667,13 @@ public:
     {
 
     }
-    virtual ostream &read(ostream &out)const
+    virtual ostream &print(ostream &out)const
     {
         out<<name<<" ";
         out<<id_number<<" ";
         out<<phone_number<<" ";
         out<<id<<" ";
-        out<<borrow_return_book::read(out);
+        out<<borrow_return_book::print(out);
         return out;
     }
     string get_name()
@@ -698,7 +699,7 @@ public:
         cout<<"电话号码:"<<phone_number<<endl;
         cout<<"学号或编号:"<<id<<endl;
     }
-    void revise_student_name()
+    void revise_people_name()
 	{
         string s1,s2;
         for(;;){
@@ -750,7 +751,7 @@ void borrow_book(people &person);//借书
 void return_book(people &person);//还书
 void count_book_information();//统计图书信息
 void check_borrow_return_information();//查询借阅信息
-void revise_password(people &person);//修改密码
+void revise_personal_information(people &person);//修改密码
 void revise_book_information();//修改图书信息
 int main()
 {
@@ -840,7 +841,7 @@ people startcheck()
         for(;;){
             cout<<"                 学号或者编号:";cin>>id1;
             string password2,id2,password3;
-            int flag=0;
+            int flag=0;//检测系统是否已存在此学号
             while(in.peek()!=EOF&&in.eof()){
                 in>>id2>>password2;
                 if(id2==id1){
@@ -890,7 +891,7 @@ people startcheck()
         cout<<"注册成功"<<endl;
         cin.get();
         cout<<"按任意键进入本系统"<<endl;
-        cin.get();
+        cin.get();//创建一个临时对象，并将此对象“赋值”给person
         one.set_people(name1,id_number1,phone_number1,id1,password1);
         return one;
     }
@@ -921,7 +922,7 @@ void menu()
     cout<<"\t\t\t\t├──────────────────────────────────┤\n";
     cout<<"\t\t\t\t│         7   查询借阅信息         │\n";
     cout<<"\t\t\t\t├──────────────────────────────────┤\n";
-    cout<<"\t\t\t\t│         8   修改登录密码         │\n";
+    cout<<"\t\t\t\t│         8   修改个人信息         │\n";
     cout<<"\t\t\t\t├──────────────────────────────────┤\n";
     cout<<"\t\t\t\t│         9   修改图书信息         │\n";
     cout<<"\t\t\t\t├──────────────────────────────────┤\n";
@@ -942,7 +943,7 @@ int user_choice(people &person)
     case 5:return_book(person);break;
     case 6:count_book_information();break;
     case 7:check_borrow_return_information();break;
-    case 8:revise_password(person);break;
+    case 8:revise_personal_information(person);break;
     case 9:revise_book_information();break;
     case 10:break;
     default:cerr<<"无此对应功能"<<endl;break;
@@ -1010,7 +1011,7 @@ void seek_book_location()
             cout<<setw(10)<<book.get_order()<<"┃"<<setw(10)<<book.get_amount()<<"┃";
             cout<<setw(10)<<book.get_classification()<<"┃"<<setw(10)<<book.get_book_shelf()<<"┃";
             cout<<setw(10)<<book.get_storey()<<"┃"<<endl;
-            cout<<"┗━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┛\n"<<endl;
+            cout<<"┗━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┛"<<endl;
         }
         else{
             cout<<"系统未找到此书籍信息"<<endl;cin.get();
@@ -1035,7 +1036,7 @@ void delete_book_infomation()
         cout<<"请输入欲删除的书籍名称:";cin>>book_name1;
         ofstream out;ifstream in;
         in.open("book.txt");
-        if(!in||in.eof()){
+        if(!in||in.eof()){//如果文件为空或者文件打开失败
             cerr<<"文件不存在或未录入任何书籍信息"<<endl;
             cin.get();
             return ;
@@ -1072,14 +1073,16 @@ void delete_book_infomation()
         }
         if(n==1){
             in.open("book.txt");
-            out.open("book1.txt",ios_base::app);
-            while(in.peek()!=EOF){
+            out.open("book1.txt",ios_base::app);//如果书名与欲删除的书名不同，则输入
+            while(in.peek()!=EOF){//到辅助文件中，若相同则不输入到辅助文件中
                 in>>book;
                 if(book.get_book_name()!=book_name1)
                     out<<book;
             }
             in.close();out.close();
             out.open("book.txt",ios::trunc);//将book1.txt中的内容“复制”到book.txt
+            out.close();
+            out.open("book.txt",ios_base::app);
             in.open("book1.txt");
             char c;
             while(in.peek()!=EOF){
@@ -1108,7 +1111,7 @@ void borrow_book(people &person)
     ifstream in;ofstream out;
     people person1;
     int brbook_number;//借阅书籍本数
-    in.open("brbook.txt");int flag1=0;
+    in.open("brbook.txt");int flag1=0;//检测用户未归还的本数
     while(in.peek()!=EOF){
         in>>person1;
         if(person1.get_name()==person.get_name()){
@@ -1216,6 +1219,8 @@ void borrow_book(people &person)
             in.close();out.close();
             char c;
             out.open("brbook.txt",ios::trunc);
+            out.close();
+            out.open("brbook.txt",ios_base::app);
             in.open("brbook1.txt");
             while(in.peek()!=EOF){
                 in.get(c);
@@ -1243,6 +1248,8 @@ void borrow_book(people &person)
         in.close();out.close();
         char c;
         out.open("book.txt",ios::trunc);
+        out.close();
+        out.open("book.txt",ios_base::app);
         in.open("book1.txt");
         while(in.peek()!=EOF){
             in.get(c);
@@ -1294,11 +1301,20 @@ void return_book(people &person)
             }
         }
     }
-    rbook_number==n;
+    rbook_number=n;
     out.open("rbook.txt");
     person.set_rbook_information(rbook_number,book);
     out<<person;
-    out.close();
+    out.close();//检测归还时间是否超过预定时间
+    Time time1=person.get_brtime();
+    Time time2=person.get_rtime();
+    int time;
+    time=time2-time1;
+    if(time>30){
+        cout<<"归还时间超过规定时间"<<endl;
+        cout<<"你需要缴纳"<<0.1*(time-30)<<"元"<<endl;
+        cin.get();
+    }
     cout<<"归还成功"<<endl;
     for(i=0;i<rbook_number;i++){//将归还的书籍数量加1
         in.open("book.txt");
@@ -1316,6 +1332,8 @@ void return_book(people &person)
     in.close();out.close();
     char c;
     out.open("book.txt",ios::trunc);
+    out.close();
+    out.open("book.txt",ios_base::app);
     in.open("book1.txt");
     while(in.peek()!=EOF){
         in.get(c);
@@ -1353,6 +1371,8 @@ void return_book(people &person)
     }
     in.close();out.close();
     out.open("brbook.txt",ios::trunc);
+    out.close();
+    out.open("brbook.txt",ios_base::app);
     in.open("brbook1.txt");
     while(in.peek()!=EOF){
         in.get(c);
@@ -1366,16 +1386,123 @@ void return_book(people &person)
     cin.get();
 }
 void count_book_information()
-{   system("cls");cin.get();
+{
+    system("cls");cin.get();
     system("title 统计书籍信息");
     ifstream in;int n,m;
     for(;;){
+        system("cls");
         cout<<"\t\t\t\t┌──────────────────────────────────┐\n";
         cout<<"\t\t\t\t│         图书管理借阅系统         │\n";
         cout<<"\t\t\t\t├──────────────────────────────────┤\n";
         cout<<"\t\t\t\t│         1   统计总藏书           │\n";
         cout<<"\t\t\t\t├──────────────────────────────────┤\n";
-        cout<<"\t\t\t\t│         2   统计类别         │\n";
+        cout<<"\t\t\t\t│         2   统计类别             │\n";
+        cout<<"\t\t\t\t└──────────────────────────────────┘\n";
+        cout<<"请输入你的选择:";cin>>n;
+        if(n==1){
+            int sum=0;int k;
+            book_date book;
+            in.open("book.txt");
+            while(in.peek()!=EOF){
+               in>>book;
+               sum++;
+            }
+            in.close();sum--;
+            cout<<"此图书馆共藏书"<<sum<<"册"<<endl;
+            cout<<"是否继续浏览所有书籍信息?(1:yes    0:no):";
+            cin>>k;
+            if(k==1){
+                cout<<"┏━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓"<<endl;
+                cout<<"┃"<<setw(10)<<"书名"<<"┃"<<setw(10)<<"作者"<<"┃"<<setw(10)<<"出版社"<<"┃";
+                cout<<setw(10)<<"ISBN"<<"┃"<<setw(10)<<"出版时间"<<"┃"<<setw(10)<<"版次"<<"┃";
+                cout<<setw(10)<<"数量"<<"┃"<<setw(10)<<"类别"<<"┃"<<setw(10)<<"书架数"<<"┃";
+                cout<<setw(10)<<"层数"<<"┃"<<endl;
+                in.open("book.txt");//此处预防最后一个换行符干扰文件操作
+                while(in.peek()!=EOF&&sum){
+                    in>>book;
+                    cout<<"┣━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━┫"<<endl;
+                    cout<<"┃"<<setw(10)<<book.get_book_name()<<"┃"<<setw(10)<<book.get_book_author()<<"┃";
+                    cout<<setw(10)<<book.get_pubishing_company()<<"┃"<<setw(10)<<book.get_ISBN()<<"┃";
+                    cout<<setw(4)<<book.get_publishing_date().get_year()<<"."<<setw(2)<<book.get_publishing_date().get_month();
+                    cout<<"."<<setw(2)<<book.get_publishing_date().get_day()<<"┃";
+                    cout<<setw(10)<<book.get_order()<<"┃"<<setw(10)<<book.get_amount()<<"┃";
+                    cout<<setw(10)<<book.get_classification()<<"┃"<<setw(10)<<book.get_book_shelf()<<"┃";
+                    cout<<setw(10)<<book.get_storey()<<"┃"<<endl;
+                    sum--;
+                }
+                in.close();
+               cout<<"┗━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┛"<<endl;
+            }
+        }
+        else if(n==2){
+            map<string,int>mymap;
+            in.open("book.txt");//用map录入书籍类别
+            book_date book;int j=1;//map可以将相同的key值(即使value的值不同)忽略掉
+            while(in.peek()!=EOF){//即关键字不会重复出现
+                in>>book;//这样就保证了统计时不会出现两个相同的类别
+                mymap.insert(pair<string,int>(book.get_classification(),1));
+            }//且时间复杂度为O(1);
+            in.close();//同时map也更好操作
+            auto it=mymap.begin();//唯一的缺点是用到了C++11的迭代器
+            int sum=0;//必须用支持C++11的编译器编译
+            for(it;it!=mymap.end();it++){
+                sum++;
+                it->second=j;j++;
+            }
+            cout<<"共收集"<<sum<<"种书籍"<<endl;
+            int k,w;
+            it=mymap.begin();
+            cout<<"是否查询相关类别的书籍?(1:yes  0:no):";cin>>k;
+            if(k==1){
+                cout<<"\t\t\t\t┌──────────────────────────────────┐\n";
+                cout<<"\t\t\t\t│         书籍类别查询选择         │\n";
+                for(it;it!=mymap.end();it++){
+                    cout<<"\t\t\t\t├──────────────────────────────────┤\n";
+                    cout<<"\t\t\t\t│        "<<setw(2)<<it->second<<":"<<setw(10)<<it->first<<"             "<<"│\n";
+                }
+                cout<<"\t\t\t\t└──────────────────────────────────┘\n";
+                cout<<"请输入你的选择:";cin>>w;
+                int flag=0;it=mymap.begin();
+                for(it;it!=mymap.end();it++){
+                    if(it->second==w){
+                        flag=1;break;
+                    }
+                }
+                if(flag==1){
+                    in.open("book.txt");
+                    cout<<"┏━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓"<<endl;
+                    cout<<"┃"<<setw(10)<<"书名"<<"┃"<<setw(10)<<"作者"<<"┃"<<setw(10)<<"出版社"<<"┃";
+                    cout<<setw(10)<<"ISBN"<<"┃"<<setw(10)<<"出版时间"<<"┃"<<setw(10)<<"版次"<<"┃";
+                    cout<<setw(10)<<"数量"<<"┃"<<setw(10)<<"类别"<<"┃"<<setw(10)<<"书架数"<<"┃";
+                    cout<<setw(10)<<"层数"<<"┃"<<endl;
+                    while(in.peek()!=EOF){
+                        in>>book;
+                        if(book.get_classification()==it->first){
+                            cout<<"┣━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━┫"<<endl;
+                            cout<<"┃"<<setw(10)<<book.get_book_name()<<"┃"<<setw(10)<<book.get_book_author()<<"┃";
+                            cout<<setw(10)<<book.get_pubishing_company()<<"┃"<<setw(10)<<book.get_ISBN()<<"┃";
+                            cout<<setw(4)<<book.get_publishing_date().get_year()<<"."<<setw(2)<<book.get_publishing_date().get_month();
+                            cout<<"."<<setw(2)<<book.get_publishing_date().get_day()<<"┃";
+                            cout<<setw(10)<<book.get_order()<<"┃"<<setw(10)<<book.get_amount()<<"┃";
+                            cout<<setw(10)<<book.get_classification()<<"┃"<<setw(10)<<book.get_book_shelf()<<"┃";
+                            cout<<setw(10)<<book.get_storey()<<"┃"<<endl;
+                        }
+                    }
+                    in.close();
+                    cout<<"┗━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┛"<<endl;
+                }
+                else
+                    cout<<"选择错误"<<endl;
+            }
+        }
+        else{
+            cout<<"选择错误"<<endl;
+        }
+        cout<<"是否继续统计?(1:yes    0:no):";
+        cin>>m;
+        if(m==0)
+            break;
     }
     cin.get();
 }
@@ -1668,58 +1795,77 @@ void check_borrow_return_information()
     }
     cin.get();
 }
-void revise_password(people &person)
+void revise_personal_information(people &person)
 {
     system("cls");cin.get();
-    system("title 修改密码");
-    string password1,id,password2,password3,password4;
-    ifstream in;ofstream out;
-    in.open("password.txt");
-    while(in.peek()!=EOF){
-        in>>id>>password2;
-        if(id==person.get_id()){
-            in.close();break;
-        }
+    system("title 修改个人信息");
+    cout<<"你的个人信息如下(不包括密码)"<<endl;
+    person.show_people();
+    int n;
+    cout<<"\t\t\t\t┌──────────────────────────────────┐\n";
+    cout<<"\t\t\t\t│              修改选项            │\n";
+    cout<<"\t\t\t\t├──────────────────────────────────┤\n";
+    cout<<"\t\t\t\t│        1   修改姓名              │\n";
+    cout<<"\t\t\t\t├──────────────────────────────────┤\n";
+    cout<<"\t\t\t\t│        2   修改电话号码          │\n";
+    cout<<"\t\t\t\t├──────────────────────────────────┤\n";
+    cout<<"\t\t\t\t│        3   修改密码              │\n";
+    cout<<"\t\t\t\t├──────────────────────────────────┤\n";
+    cout<<"\t\t\t\t│        4   返回主菜单            │\n";
+    cout<<"\t\t\t\t└──────────────────────────────────┘\n";
+    cout<<"请输入你的选择:";cin>>n;
+    if(n==1){
+        person.revise_people_name();
     }
-    int i;
-    for(i=0;i<3;i++){
-        cout<<"请输入原密码:";
-        char s[21];int j=0;
-        while((s[j]=getch())!=13&&j!=20){
-            putch('*');
-            j++;
+    else if(n==2){
+        person.revise_phone_number();
+    }
+    else if(n==3){
+        string password1,id,password2,password3,password4;
+        ifstream in;ofstream out;
+        in.open("password.txt");
+        while(in.peek()!=EOF){
+            in>>id>>password2;
+            if(id==person.get_id()){
+                in.close();break;
+            }
         }
-        s[j]='\0';
-        password1=s;
-        int n;
-        if(password1==password2){
-            for(;;){
+        int i;
+        for(i=0;i<3;i++){
+            cout<<"请输入原密码:";
+            char s[21];int j=0;
+            while((s[j]=getch())!=13&&j!=20){
+                putch('*');
+                j++;
+            }
+            s[j]='\0';
+            password1=s;
+            int n;
+            if(password1==password2){
                 for(;;){
                     cout<<"请输入新密码:";
-                    char s[21];int j=0;
-                    while((s[j]=getch())!=13&&j!=20){
+                    char s1[21];int j=0;
+                    while((s1[j]=getch())!=13&&j!=20){
                         putch('*');
                         j++;
                     }
-                    s[j]='\0';
-                    password3=s;
-                }
-                for(;;){
+                    s1[j]='\0';
+                    password3=s1;
                     cout<<"请再次确认新密码:";
-                    char s[21];int j=0;
-                    while((s[j]=getch())!=13&&j!=20){
+                    char s2[21];
+                    j=0;
+                    while((s2[j]=getch())!=13&&j!=20){
                         putch('*');
                         j++;
                     }
-                    s[j]='\0';
-                    password4=s;
+                    s2[j]='\0';
+                    password4=s2;
+                    if(password3==password4)
+                        break;
+                    else{
+                        cout<<"两次密码不同,请重新输入"<<endl;
+                    }
                 }
-                if(password3==password4)
-                    break;
-                else{
-                    cout<<"两次密码不同,请重新输入"<<endl;
-                }
-            }
             cout<<"确认将密码修改为:"<<password3<<"?(1:yes   2:no)"<<endl;
             cin>>n;
             if(n==1){
@@ -1735,6 +1881,8 @@ void revise_password(people &person)
                 in.close();
                 out.close();//将password1.txt文件中的内容负“复制”到password.txt
                 out.open("password.txt",ios::trunc);
+                out.close();
+                out.open("password.txt",ios_base::app);
                 in.open("password1.txt");
                 char c;
                 while(in.peek()!=EOF){
@@ -1757,6 +1905,41 @@ void revise_password(people &person)
     }
     else
         cout<<"密码修改成功"<<endl;
+    }
+    else if(n==4){
+        return;
+    }
+    else
+        cout<<"选择错误"<<endl;
+    if(n==1&&n==2){
+        ifstream in;ofstream out;
+        string id1,name1,phone_number1,id_number1;
+        in.open("student.txt");
+        out.open("student1.txt",ios_base::app);
+        while(in.peek()!=EOF){
+            in>>id1>>name1>>phone_number1>>id_number1;
+            if(person.get_id()==id1)
+                out<<person;
+            else
+                out<<id1<<" "<<name1<<" "<<phone_number1<<" "<<id_number1<<"\n";
+        }
+        in.close();
+        out.close();
+        out.open("student.txt",ios::trunc);
+        out.close();
+        out.open("student.txt",ios_base::app);
+        in.open("student1.txt");
+        char c;
+        while(in.peek()!=EOF){
+            in.get(c);
+            out<<c;
+        }
+        out.close();
+        in.close();
+        out.open("student1.txt",ios::trunc);
+        out.close();//将student1文件的内容清空
+    }
+    cin.get();
     cout<<"按任意键返回主菜单"<<endl;
     cin.get();
 }
@@ -1848,6 +2031,8 @@ void revise_book_information()
                 in.close();
                 out.close();
                 out.open("book.txt",ios::trunc);
+                out.close();
+                out.open("book.txt",ios_base::app);
                 in.open("book1.txt");
                 char c;
                 while(in.peek()!=EOF){
@@ -1857,7 +2042,7 @@ void revise_book_information()
                 out.close();
                 in.close();
                 out.open("book1.txt",ios::trunc);
-                out.close();//将password1文件的内容清空
+                out.close();//将book1文件的内容清空
                 cout<<"修改成功"<<endl;
                 cin.get();
             }
