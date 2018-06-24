@@ -242,7 +242,7 @@ public:
     virtual ostream &print(ostream& out)const{
        out<<classification<<" ";
        out<<book_shelf<<" ";
-       out<<storey<<"\n";
+       out<<storey;
        return out;
     }
     void revise_classification()
@@ -634,22 +634,22 @@ public:
     virtual ostream &print(ostream &out)const
     {
         int i;
+        out<<number<<" ";
         for(i=0;i<number;i++)
             out<<book_name[i]<<" ";
         out<<borrow_time<<" ";
         out<<return_time<<" ";
-        out<<number<<" ";
-        out<<return_y_n<<"\n";
+        out<<return_y_n;
         return out;
     }
     virtual istream &input(istream &in)
     {
         int i;
+        in>>number;
         for(i=0;i<number;i++)
             in>>book_name[i];
         in>>borrow_time;
         in>>return_time;
-        in>>number;
         in>>return_y_n;
         return in;
     }
@@ -675,6 +675,14 @@ public:
         out<<id<<" ";
         out<<borrow_return_book::print(out);
         return out;
+    }
+    string get_phone_number()
+    {
+        return phone_number;
+    }
+    string get_id_number()
+    {
+        return id_number;
     }
     string get_name()
     {
@@ -804,8 +812,8 @@ people startcheck()
                         password1=s;
                         flag=1;
                         if(password1==password2){
-                            ine.open("student.txt",ios_base::app);
-                            while(!in.eof()&&ine.peek()!=EOF){
+                            ine.open("student.txt");
+                            while(ine.peek()!=EOF){
                                 ine>>id3>>name1>>phone_number1>>id_number1;
                                 if(id2==id3){
                                     ine.close();
@@ -815,7 +823,7 @@ people startcheck()
                             }
                         }
                         else
-                            cout<<"密码错误,请重新输入"<<endl;
+                            cout<<"\n                 密码错误,请重新输入"<<endl;
                     }
                     in.close();
                     if(i==3){
@@ -832,7 +840,7 @@ people startcheck()
     else if(n==2){
         system("cls");
         system("title 注册");
-        in.open("password.txt",ios_base::app);
+        in.open("password.txt");
         if(!in){
             cerr<<"文件打开失败(文件不存在)，按任意键结束"<<endl;
             cin.get();cin.get();
@@ -842,14 +850,15 @@ people startcheck()
             cout<<"                 学号或者编号:";cin>>id1;
             string password2,id2,password3;
             int flag=0;//检测系统是否已存在此学号
-            while(in.peek()!=EOF&&in.eof()){
+            while(in.peek()!=EOF){
                 in>>id2>>password2;
                 if(id2==id1){
                     flag=1;
-                    cout<<"系统已存在此学号,请检查学号是否输入正确或者是否已注册"<<endl;
+                    cout<<"                 系统已存在此学号,请检查学号是否输入正确或者是否已注册"<<endl;
                     break;
                 }
             }
+            in.close();
             if(flag==0){
                 cout<<"                 姓名:";cin>>name1;
                 cout<<"                 身份证号:";cin>>id_number1;
@@ -864,7 +873,7 @@ people startcheck()
                     s1[j]='\0';
                     password1=s1;
                     j=0;
-                    cout<<"请再次确认密码:";
+                    cout<<"\n                 请再次确认密码:";
                     char s2[21];
                     while((s2[j]=getch())!=13&&j!=20){
                         putch('*');
@@ -879,16 +888,39 @@ people startcheck()
                     }
                 }
                 in.close();
+                in.open("password.txt");
+                char c;int flag1=0;
+                in>>c;
+                if(in.eof())
+                    flag1=1;
+                in.close();
                 out.open("password.txt",ios_base::app);
-                out<<id1<<" "<<password1<<"\n";
+                if(flag1==1){
+                    out<<id1<<" "<<password1;
+                }
+                else{
+                    out<<endl;
+                    out<<id1<<" "<<password1;
+                }
                 out.close();
+                in.open("student.txt");
+                int flag2=0;
+                in>>c;
+                if(in.eof())
+                    flag2=1;
+                in.close();
                 out.open("student.txt",ios_base::app);
-                out<<id1<<" "<<name1<<" "<<phone_number1<<" "<<id_number1<<"\n";
+                if(flag2==1)
+                    out<<id1<<" "<<name1<<" "<<phone_number1<<" "<<id_number1;
+                else{
+                    out<<endl;
+                    out<<id1<<" "<<name1<<" "<<phone_number1<<" "<<id_number1;
+                }
                 out.close();
                 break;
             }
         }
-        cout<<"注册成功"<<endl;
+        cout<<"\n注册成功"<<endl;
         cin.get();
         cout<<"按任意键进入本系统"<<endl;
         cin.get();//创建一个临时对象，并将此对象“赋值”给person
@@ -953,20 +985,32 @@ int user_choice(people &person)
 void input_book_information()
 {
     system("cls");system("title 添加书籍信息");
-    ofstream out;int n;
+    ofstream out;ifstream in;
+    in.open("book.txt");
+    char c;int flag=0;
+    in>>c;
+    if(in.eof())
+        flag=1;
+    in.close();
+    out.open("book.txt",ios_base::app);
     for(;;){
+        int n;
         book_date book;
         book.set_book_date();
-        out.open("book.txt",ios_base::app);
         if(!out){
             cerr<<"文件打开失败"<<endl;
             cin.get();
             return;
         }
-        out<<book;
-        cout<<"是否继续添加?"<<endl;
-        cout<<"1 :yes"<<endl;
-        cout<<"0 :no"<<endl;
+        if(flag==1){
+            out<<book;
+            flag=0;
+        }
+        else{
+            out<<endl;
+            out<<book;
+        }
+        cout<<"是否继续添加?(1:yes   0:no):";
         cin>>n;
         if(n==0)
             break;
@@ -980,14 +1024,18 @@ void seek_book_location()
     system("cls");system("title 查找图书信息");
     string book_name1;
     ifstream in;
-    in.open("book.txt",ios_base::app);
+    in.open("book.txt");//检测文件是否能正常打开或者是否为空
     if(!in||in.eof()){
         cout<<"文件打开失败或文件无书籍信息"<<endl;
         cin.get();
         return ;
     }
+    else
+        in.close();
     int flag=0,n;
     for(;;){
+        flag=0;
+        in.open("book.txt");
         cout<<"请输入待查询位置的书籍名:";cin>>book_name1;
         int n;book_date book;
         while(in.peek()!=EOF){
@@ -1016,6 +1064,7 @@ void seek_book_location()
         else{
             cout<<"系统未找到此书籍信息"<<endl;cin.get();
         }
+        in.close();
         cout<<"是否继续查找?"<<endl;
         cout<<"1 :yes"<<endl;
         cout<<"0 :no"<<endl;
@@ -1030,17 +1079,20 @@ void delete_book_infomation()
 {
     system("cls");cin.get();
     string book_name1;
+    ofstream out;ifstream in;
     book_date book;
     int m;
+    in.open("book.txt");
+    if(!in||in.eof()){//如果文件为空或者文件打开失败
+        cerr<<"文件不存在或未录入任何书籍信息"<<endl;
+        cin.get();
+        return ;
+    }
+    else
+        in.close();
     for(;;){
         cout<<"请输入欲删除的书籍名称:";cin>>book_name1;
-        ofstream out;ifstream in;
         in.open("book.txt");
-        if(!in||in.eof()){//如果文件为空或者文件打开失败
-            cerr<<"文件不存在或未录入任何书籍信息"<<endl;
-            cin.get();
-            return ;
-        }
         int flag=0;int n=0;
         while(in.peek()!=EOF){
             in>>book;
@@ -1073,18 +1125,31 @@ void delete_book_infomation()
         }
         if(n==1){
             in.open("book.txt");
+            char c;int flag1=0;
+            in>>c;
+            if(in.eof())
+                flag1=1;
+            in.close();
+            in.open("book.txt");
             out.open("book1.txt",ios_base::app);//如果书名与欲删除的书名不同，则输入
             while(in.peek()!=EOF){//到辅助文件中，若相同则不输入到辅助文件中
                 in>>book;
-                if(book.get_book_name()!=book_name1)
-                    out<<book;
+                if(book.get_book_name()!=book_name1){
+                    if(flag1==1){
+                        out<<book;
+                        flag1=0;
+                    }
+                    else{
+                        out<<endl;
+                        out<<book;
+                    }
+                }
             }
             in.close();out.close();
             out.open("book.txt",ios::trunc);//将book1.txt中的内容“复制”到book.txt
             out.close();
             out.open("book.txt",ios_base::app);
             in.open("book1.txt");
-            char c;
             while(in.peek()!=EOF){
                 in.get(c);
                 out<<c;
@@ -1165,100 +1230,157 @@ void borrow_book(people &person)
     brbook_number=n;
     for(i=0;i<n;i++)
         book[i]=book2[i].get_book_name();
-    cout<<"确认借阅以下书籍?(1:yes   2:no)"<<endl;
-    int m;
-    cout<<"┏━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓"<<endl;
-    cout<<"┃"<<setw(10)<<"书名"<<"┃"<<setw(10)<<"作者"<<"┃"<<setw(10)<<"出版社"<<"┃";
-    cout<<setw(10)<<"ISBN"<<"┃"<<setw(10)<<"出版时间"<<"┃"<<setw(10)<<"版次"<<"┃";
-    cout<<setw(10)<<"数量"<<"┃"<<setw(10)<<"类别"<<"┃"<<setw(10)<<"书架数"<<"┃";
-    cout<<setw(10)<<"层数"<<"┃"<<endl;
-    for(i=0;i<brbook_number;i++){
-        cout<<"┣━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━┫"<<endl;
-        cout<<"┃"<<setw(10)<<book2[i].get_book_name()<<"┃"<<setw(10)<<book2[i].get_book_author()<<"┃";
-        cout<<setw(10)<<book2[i].get_pubishing_company()<<"┃"<<setw(10)<<book2[i].get_ISBN()<<"┃";
-        cout<<setw(4)<<book2[i].get_publishing_date().get_year()<<"."<<setw(2)<<book2[i].get_publishing_date().get_month();
-        cout<<"."<<setw(2)<<book2[i].get_publishing_date().get_day()<<"┃";
-        cout<<setw(10)<<book2[i].get_order()<<"┃"<<setw(10)<<book2[i].get_amount()<<"┃";
-        cout<<setw(10)<<book2[i].get_classification()<<"┃"<<setw(10)<<book2[i].get_book_shelf()<<"┃";
-        cout<<setw(10)<<book2[i].get_storey()<<"┃"<<endl;
-    }
-    cout<<"┗━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┛\n"<<endl;
-    cin>>m;
-    if(m==1){
-        people person2;int flag2=0;
-        in.open("brbook.txt");
-        while(in.peek()!=EOF){
-            in>>person2;flag2=0;
-            if(person2.get_name()==person.get_name()){
-                int j;
-                for(j=0;j<person2.get_number();j++){
-                    book[n]=person2.get_book_name(j);n++;
-                }
-                flag2=1;
-            }
-            if(flag2==1)
-                break;
+    if(n!=0){
+        cout<<"确认借阅以下书籍?(1:yes   0:no)"<<endl;
+        int m;
+        cout<<"┏━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓"<<endl;
+        cout<<"┃"<<setw(10)<<"书名"<<"┃"<<setw(10)<<"作者"<<"┃"<<setw(10)<<"出版社"<<"┃";
+        cout<<setw(10)<<"ISBN"<<"┃"<<setw(10)<<"出版时间"<<"┃"<<setw(10)<<"版次"<<"┃";
+        cout<<setw(10)<<"数量"<<"┃"<<setw(10)<<"类别"<<"┃"<<setw(10)<<"书架数"<<"┃";
+        cout<<setw(10)<<"层数"<<"┃"<<endl;
+        for(i=0;i<brbook_number;i++){
+            cout<<"┣━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━┫"<<endl;
+            cout<<"┃"<<setw(10)<<book2[i].get_book_name()<<"┃"<<setw(10)<<book2[i].get_book_author()<<"┃";
+            cout<<setw(10)<<book2[i].get_pubishing_company()<<"┃"<<setw(10)<<book2[i].get_ISBN()<<"┃";
+            cout<<setw(4)<<book2[i].get_publishing_date().get_year()<<"."<<setw(2)<<book2[i].get_publishing_date().get_month();
+            cout<<"."<<setw(2)<<book2[i].get_publishing_date().get_day()<<"┃";
+            cout<<setw(10)<<book2[i].get_order()<<"┃"<<setw(10)<<book2[i].get_amount()<<"┃";
+            cout<<setw(10)<<book2[i].get_classification()<<"┃"<<setw(10)<<book2[i].get_book_shelf()<<"┃";
+            cout<<setw(10)<<book2[i].get_storey()<<"┃"<<endl;
         }
-        in.close();
-        person.set_bbook_information(n,book);//如果用户不存在未归还的书籍信息
-        if(flag2==1){
-            out.open("brbook.txt",ios_base::app);
-            out<<person;
-            out.close();
-        }//如果用户存在未归还的书籍信息
-        else{
+        cout<<"┗━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┛\n"<<endl;
+        cin>>m;
+        if(m==1){
+            people person2;int flag2=0;
             in.open("brbook.txt");
-            out.open("brbook1.txt",ios_base::app);
             while(in.peek()!=EOF){
-                in>>person2;
-                if(person2.get_name()==person.get_name())
+                in>>person2;flag2=0;
+                if(person2.get_name()==person.get_name()){
+                    int j;
+                    for(j=0;j<person2.get_number();j++){
+                        book[n]=person2.get_book_name(j);n++;
+                    }
+                    flag2=1;
+                }
+                if(flag2==1)
+                    break;
+            }
+            in.close();
+            in.open("brbook.txt");
+            char c;int flag3=0;
+            in>>c;
+            if(in.eof())
+                flag3=1;
+            in.close();
+            person.set_bbook_information(n,book);
+            if(flag2==0){//如果用户不存在未归还的书籍信息
+                out.open("brbook.txt",ios_base::app);
+                if(flag3==1){
                     out<<person;
-                else
-                    out<<person2;
+                    flag3=0;
+                }
+                else{
+                    out<<endl;
+                    out<<person;
+                }
+                out.close();
+            }//如果用户存在未归还的书籍信息
+            else{
+                in.open("brbook1.txt");
+                int flag4=0;
+                in>>c;
+                if(in.eof())
+                    flag4=1;
+                in.close();
+                in.open("brbook.txt");
+                out.open("brbook1.txt",ios_base::app);
+                while(in.peek()!=EOF){
+                    in>>person2;
+                    if(person2.get_name()==person.get_name()){
+                        if(flag4==1){
+                            out<<person;
+                            flag4=0;
+                        }
+                        else{
+                            out<<endl;
+                            out<<person;
+                        }
+                    }
+                    else{
+                        if(flag4==1){
+                            out<<person;
+                            flag4=0;
+                        }
+                        else{
+                            out<<endl;
+                            out<<person;
+                        }
+                    }
+                }
+                in.close();out.close();
+                out.open("brbook.txt",ios::trunc);
+                out.close();
+                out.open("brbook.txt",ios_base::app);
+                in.open("brbook1.txt");
+                while(in.peek()!=EOF){
+                    in.get(c);
+                    out<<c;
+                }
+                out.close();
+                in.close();
+                out.open("brbook1.txt",ios::trunc);
+                out.close();//将brbook1文件的内容清空
+            }
+            cout<<"借阅成功"<<endl;cin.get();
+            //将借阅的书籍数量减1
+            in.open("book1.txt");int flag5=0,flag6=0;
+            in>>c;
+            if(in.eof())
+                flag6=1;
+            in.close();
+            in.open("book.txt");
+            out.open("book1.txt",ios_base::app);
+            while(in.peek()!=EOF){
+                in>>book1;
+                for(i=0;i<brbook_number;i++){
+                    if(book1.get_book_name()==book[i]){
+                        book1.low_amount();flag5=1;
+                        if(flag6==1){
+                            out<<book1;
+                            flag6=0;
+                        }
+                        else{
+                            out<<endl;
+                            out<<book1;
+                        }
+                        break;
+                    }
+                }
+                if(flag5==0){
+                    if(flag6==1){
+                        out<<book1;
+                        flag6=0;
+                    }
+                    else{
+                        out<<endl;
+                        out<<book1;
+                    }
+                }
             }
             in.close();out.close();
-            char c;
-            out.open("brbook.txt",ios::trunc);
+            out.open("book.txt",ios::trunc);
             out.close();
-            out.open("brbook.txt",ios_base::app);
-            in.open("brbook1.txt");
+            out.open("book.txt",ios_base::app);
+            in.open("book1.txt");
             while(in.peek()!=EOF){
                 in.get(c);
                 out<<c;
             }
             out.close();
             in.close();
-            out.open("brbook1.txt",ios::trunc);
-            out.close();//将brbook1文件的内容清空
+            out.open("book1.txt",ios::trunc);
+            out.close();//将book1文件的内容清空
         }
-        cout<<"借阅成功"<<endl;
-        for(i=0;i<brbook_number;i++){//将借阅的书籍数量减1
-            in.open("book.txt");
-            out.open("book1.txt",ios_base::app);
-            while(in.peek()!=EOF){
-                in>>book1;
-                if(book1.get_book_name()==book[i])
-                    out<<book1;
-                else{
-                    book1.low_amount();
-                    out<<book1;
-                }
-            }
-        }
-        in.close();out.close();
-        char c;
-        out.open("book.txt",ios::trunc);
-        out.close();
-        out.open("book.txt",ios_base::app);
-        in.open("book1.txt");
-        while(in.peek()!=EOF){
-            in.get(c);
-            out<<c;
-        }
-        out.close();
-        in.close();
-        out.open("book1.txt",ios::trunc);
-        out.close();//将book1文件的内容清空
     }
     cout<<"按任意键返回主菜单"<<endl;
     cin.get();
@@ -1283,7 +1405,7 @@ void return_book(people &person)
     for(i=0;i<rbook_number;i++){
         in.open("brbook.txt");int flag=0;
         while(in.peek()!=EOF){
-            cin>>person1;
+            in>>person1;
             if(person1.get_name()==person.get_name()){
                 int j;
                 for(j=0;j<person1.get_number();j++){
@@ -1302,86 +1424,128 @@ void return_book(people &person)
         }
     }
     rbook_number=n;
-    out.open("rbook.txt");
-    person.set_rbook_information(rbook_number,book);
-    out<<person;
-    out.close();//检测归还时间是否超过预定时间
-    Time time1=person.get_brtime();
-    Time time2=person.get_rtime();
-    int time;
-    time=time2-time1;
-    if(time>30){
-        cout<<"归还时间超过规定时间"<<endl;
-        cout<<"你需要缴纳"<<0.1*(time-30)<<"元"<<endl;
-        cin.get();
-    }
-    cout<<"归还成功"<<endl;
-    for(i=0;i<rbook_number;i++){//将归还的书籍数量加1
-        in.open("book.txt");
-        out.open("book1.txt",ios_base::app);
-        while(in.peek()!=EOF){
-            in>>book1;
-            if(book1.get_book_name()==book[i])
-                out<<book1;
-            else{
-                book1.low_amount();
-                out<<book1;
-            }
+    if(n>0){
+        in.open("rbook.txt");
+        char c;int flag=0;
+        in>>c;
+        if(in.eof())
+            flag=1;
+        in.close();
+        out.open("rbook.txt",ios_base::app);
+        person.set_rbook_information(rbook_number,book);
+        if(flag==1)
+            out<<person;
+        else{
+            out<<endl;
+            out<<person;
         }
-    }
-    in.close();out.close();
-    char c;
-    out.open("book.txt",ios::trunc);
-    out.close();
-    out.open("book.txt",ios_base::app);
-    in.open("book1.txt");
-    while(in.peek()!=EOF){
-        in.get(c);
-        out<<c;
-    }
-    out.close();
-    in.close();
-    out.open("book1.txt",ios::trunc);
-    out.close();//将book1文件的内容清空
-    in.open("brbook.txt");//更改brbook.txt的借书信息
-    out.open("brbook1.txt",ios_base::app);
-    int j,k=0;string book3[10];
-    while(in.peek()!=EOF){
-        in>>person1;
-        if(person1.get_name()==person.get_name()){
-            for(i=0;i<person1.get_number();i++){
-                int flag=0;
-                for(j=0;j<person.get_number();j++){
-                    if(person1.get_book_name(i)==person.get_book_name(j)){
-                        flag=1;break;
+        out.close();//检测归还时间是否超过预定时间
+        Time time1=person.get_brtime();
+        Time time2=person.get_rtime();
+        int time;
+        time=time2-time1;
+        if(time>30){
+            cout<<"归还时间超过规定时间"<<endl;
+            cout<<"你需要缴纳"<<0.1*(time-30)<<"元"<<endl;
+            cin.get();
+        }
+        cout<<"归还成功"<<endl;cin.get();
+        in.open("book1.txt");
+        in>>c;int flag1=0;
+        if(in.eof())
+            flag1=0;
+        in.close();
+        for(i=0;i<rbook_number;i++){//将归还的书籍数量加1
+            in.open("book.txt");
+            out.open("book1.txt",ios_base::app);
+            while(in.peek()!=EOF){
+                in>>book1;
+                if(book1.get_book_name()==book[i]){
+                    if(flag1==1){
+                        out<<book1;
+                        flag1=0;
+                    }
+                    else{
+                        out<<endl;
+                        out<<book1;
                     }
                 }
-                if(flag==0){
-                    book3[k]=person1.get_book_name(i);k++;
+                else{
+                    book1.high_amount();
+                    if(flag1==1){
+                        out<<book1;
+                        flag1=0;
+                    }
+                    else{
+                        out<<endl;
+                        out<<book1;
+                    }
                 }
-            }//如果未全部归还
-            if(k>0){
-                person1.revise_brbook_infomation(k,book3);
-                out<<person1;
             }
         }
-        else{
-            out<<person1;
+        in.close();out.close();
+        out.open("book.txt",ios::trunc);
+        out.close();
+        out.open("book.txt",ios_base::app);
+        in.open("book1.txt");
+        while(in.peek()!=EOF){
+            in.get(c);
+            out<<c;
         }
+        out.close();
+        in.close();
+        out.open("book1.txt",ios::trunc);
+        out.close();//将book1文件的内容清空
+        in.open("brbook.txt");//更改brbook.txt的借书信息
+        out.open("brbook1.txt",ios_base::app);
+        int j,k=0;string book3[10];
+        while(in.peek()!=EOF){
+            in>>person1;
+            if(person1.get_name()==person.get_name()){
+                for(i=0;i<person1.get_number();i++){
+                    int flag=0;
+                    for(j=0;j<person.get_number();j++){
+                        if(person1.get_book_name(i)==person.get_book_name(j)){
+                            flag=1;break;
+                        }
+                    }
+                    if(flag==0){
+                        book3[k]=person1.get_book_name(i);k++;
+                    }
+                }//如果未全部归还
+                if(k>0){
+                    person1.revise_brbook_infomation(k,book3);
+                    if(out.eof())
+                        out<<person1;
+                    else{
+                        out<<endl;
+                        out<<person1;
+                    }
+                }
+            }
+            else{
+                if(out.eof())
+                    out<<person1;
+                else{
+                    out<<endl;
+                    out<<person1;
+                }
+            }
+        }
+        in.close();out.close();
+        out.open("brbook.txt",ios::trunc);
+        out.close();
+        out.open("brbook.txt",ios_base::app);
+        in.open("brbook1.txt");
+        while(in.peek()!=EOF){
+            in.get(c);
+            out<<c;
+        }
+        out.close();
+        in.close();
+        out.open("brbook1.txt",ios::trunc);
+        out.close();//将brbook1.txt文件的内容清空
     }
-    in.close();out.close();
-    out.open("brbook.txt",ios::trunc);
-    out.close();
-    out.open("brbook.txt",ios_base::app);
-    in.open("brbook1.txt");
-    while(in.peek()!=EOF){
-        in.get(c);
-        out<<c;
-    }
-    out.close();
-    in.close();
-    out.open("brbook1.txt",ios::trunc);
-    out.close();//将brbook1.txt文件的内容清空
     cout<<"按任意键返回主菜单"<<endl;
     cin.get();
 }
@@ -1393,7 +1557,7 @@ void count_book_information()
     for(;;){
         system("cls");
         cout<<"\t\t\t\t┌──────────────────────────────────┐\n";
-        cout<<"\t\t\t\t│         图书管理借阅系统         │\n";
+        cout<<"\t\t\t\t│         图书管理统计系统         │\n";
         cout<<"\t\t\t\t├──────────────────────────────────┤\n";
         cout<<"\t\t\t\t│         1   统计总藏书           │\n";
         cout<<"\t\t\t\t├──────────────────────────────────┤\n";
@@ -1579,11 +1743,9 @@ void check_borrow_return_information()
                         cout<<"┣━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━┫"<<endl;
                         cout<<"┃"<<setw(10)<<person.get_name()<<"┃"<<setw(10)<<person.get_book_name(0);
                         cout<<"┃"<<setw(4)<<person.get_brtime().get_year()<<"."<<setw(2)<<person.get_brtime().get_month();
-              cout<<"┏━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓"<<endl;
-                cout<<"┃"<<setw(10)<<"姓名"<<"┃"<<setw(10)<<"借书书名"<<"┃"<<setw(10)<<"借阅时间"<<"┃";
-                cout<<setw(10)<<"归还时间"<<"┃"<<setw(10)<<"是否归还"<<"┃"<<endl;          cout<<"."<<setw(2)<<person.get_brtime().get_day()<<"┃";
+                        cout<<"."<<setw(2)<<person.get_brtime().get_day()<<"┃";
                         cout<<setw(4)<<person.get_rtime().get_year()<<"."<<setw(2)<<person.get_rtime().get_month();
-                        cout<<"."<<setw(2)<<person.get_rtime().get_day()<"┃";
+                        cout<<"."<<setw(2)<<person.get_rtime().get_day()<<"┃";
                         cout<<setw(10)<<"已归还"<<"┃"<<endl;
                         for(i=1;i<person.get_number();i++){
                             cout<<"┃"<<setw(10)<<" "<<"┃"<<setw(10)<<person.get_book_name(i);
@@ -1604,9 +1766,13 @@ void check_borrow_return_information()
             int flag=0;
             while(in.peek()!=EOF){
                 in>>person;
-                if(person.get_name()==book_name1){
-                    flag=1;break;
+                for(i=0;i<person.get_number();i++){
+                    if(person.get_book_name(i)==book_name1){
+                        flag=1;break;
+                    }
                 }
+                if(flag==1)
+                    break;
             }
             in.close();
             int flag1=0;
@@ -1614,9 +1780,13 @@ void check_borrow_return_information()
                 in.open("rbook.txt");
                 while(in.peek()!=EOF){
                     in>>person;
-                    if(person.get_name()==book_name1){
-                        flag1=1;break;
+                    for(i=0;i<person.get_number();i++){
+                        if(person.get_book_name(i)==book_name1){
+                            flag1=1;break;
+                        }
                     }
+                    if(flag1==1)
+                        break;
                 }
             }
             in.close();int flag2;
@@ -1640,7 +1810,7 @@ void check_borrow_return_information()
                         cout<<"┃"<<setw(10)<<person.get_name()<<"┃"<<setw(4)<<person.get_brtime().get_year();
                         cout<<"."<<setw(2)<<person.get_brtime().get_month()<<".";
                         cout<<setw(2)<<person.get_brtime().get_day()<<"┃"<<setw(10)<<" "<<"┃";
-                        cout<<setw(10)<<"未归还"<<endl;
+                        cout<<setw(10)<<"未归还"<<"┃"<<endl;
                     }
                 }
                 in.close();
@@ -1762,7 +1932,7 @@ void check_borrow_return_information()
         }
         else if(m==4){
             system("cls");
-            in.open("rbook.txt");
+            in.open("brbook.txt");
             if(!in||in.eof()){
                 cout<<"无任何借阅信息"<<endl;
                 cin.get();
@@ -1869,22 +2039,43 @@ void revise_personal_information(people &person)
             cout<<"确认将密码修改为:"<<password3<<"?(1:yes   2:no)"<<endl;
             cin>>n;
             if(n==1){
+                in.open("password1.txt");
+                char c;int flag=0;
+                in>>c;
+                if(in.eof())
+                    flag=1;
+                in.close();
                 in.open("password.txt");
                 out.open("password1.txt",ios_base::app);
                 while(in.peek()!=EOF){
                     in>>id>>password1;
-                    if(id==person.get_id())
-                        out<<id<<" "<<password3<<"\n";
-                    else
-                        out<<id<<" "<<password1<<"\n";
+                    if(id==person.get_id()){
+                        if(flag==1){
+                            out<<id<<" "<<password3;
+                            flag=0;
+                        }
+                        else{
+                            out<<endl;
+                            out<<id<<" "<<password3;
+                        }
+                    }
+                    else{
+                        if(flag==1){
+                            out<<id<<" "<<password1;
+                            flag=0;
+                        }
+                        else{
+                            out<<endl;
+                            out<<id<<" "<<password1;
+                        }
+                    }
                 }
                 in.close();
-                out.close();//将password1.txt文件中的内容负“复制”到password.txt
+                out.close();//将password1.txt文件中的内容“复制”到password.txt
                 out.open("password.txt",ios::trunc);
                 out.close();
                 out.open("password.txt",ios_base::app);
                 in.open("password1.txt");
-                char c;
                 while(in.peek()!=EOF){
                     in.get(c);
                     out<<c;
@@ -1914,14 +2105,36 @@ void revise_personal_information(people &person)
     if(n==1&&n==2){
         ifstream in;ofstream out;
         string id1,name1,phone_number1,id_number1;
+        in.open("student1.txt");
+        int flag=0;char c;
+        in>>c;
+        if(in.eof())
+            flag=1;
+        in.close();
         in.open("student.txt");
         out.open("student1.txt",ios_base::app);
         while(in.peek()!=EOF){
             in>>id1>>name1>>phone_number1>>id_number1;
-            if(person.get_id()==id1)
-                out<<person;
-            else
-                out<<id1<<" "<<name1<<" "<<phone_number1<<" "<<id_number1<<"\n";
+            if(person.get_id()==id1){
+                if(flag==1){
+                    out<<person.get_id()<<" "<<person.get_name()<<" "<<person.get_phone_number()<<" "<<person.get_id_number();
+                    flag=0;
+                }
+                else{
+                    out<<endl;
+                    out<<person.get_id()<<" "<<person.get_name()<<" "<<person.get_phone_number()<<" "<<person.get_id_number();
+                }
+            }
+            else{
+                if(flag==1){
+                    out<<id1<<" "<<name1<<" "<<phone_number1<<" "<<id_number1;
+                    flag=0;
+                }
+                else{
+                    out<<endl;
+                    out<<id1<<" "<<name1<<" "<<phone_number1<<" "<<id_number1;
+                }
+            }
         }
         in.close();
         out.close();
@@ -1929,7 +2142,6 @@ void revise_personal_information(people &person)
         out.close();
         out.open("student.txt",ios_base::app);
         in.open("student1.txt");
-        char c;
         while(in.peek()!=EOF){
             in.get(c);
             out<<c;
@@ -2018,15 +2230,37 @@ void revise_book_information()
                     case 10:book.revise_storey();
                     default:cout<<"选择错误"<<endl;break;
                 }
+                in.open("book1.txt");
+                char c;int flag1=0;
+                in>>c;
+                if(in.eof())
+                    flag1=1;
+                in.close();
                 in.open("book.txt");
                 book_date book1;
                 out.open("book1.txt",ios_base::app);
                 while(in.peek()!=EOF){
                     cin>>book1;
-                    if(book1.get_book_name()!=book.get_book_name())
-                        out<<book1;
-                    else
-                        out<<book;
+                    if(book1.get_book_name()!=book.get_book_name()){
+                        if(flag1==1){
+                            out<<book1;
+                            flag1=0;
+                        }
+                        else{
+                            out<<endl;
+                            out<<book1;
+                        }
+                    }
+                    else{
+                        if(flag1==1){
+                            out<<book1;
+                            flag1=0;
+                        }
+                        else{
+                            out<<endl;
+                            out<<book1;
+                        }
+                    }
                 }
                 in.close();
                 out.close();
@@ -2034,7 +2268,6 @@ void revise_book_information()
                 out.close();
                 out.open("book.txt",ios_base::app);
                 in.open("book1.txt");
-                char c;
                 while(in.peek()!=EOF){
                     in.get(c);
                     out<<c;
