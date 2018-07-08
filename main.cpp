@@ -88,7 +88,7 @@ public:
     }
     bool is_leapyear()
     {
-        if(year%400==0||(year%4==0&&year&100!=0))
+        if(year%400==0||(year%4==0&&year%100!=0))
            return true;
         else
            return false;
@@ -992,8 +992,9 @@ void input_book_information()
     if(in.eof())
         flag=1;
     in.close();
-    out.open("book.txt",ios_base::app);
     for(;;){
+        system("cls");
+        out.open("book.txt",ios_base::app);
         int n;
         book_date book;
         book.set_book_date();
@@ -1012,10 +1013,10 @@ void input_book_information()
         }
         cout<<"是否继续添加?(1:yes   0:no):";
         cin>>n;
+        out.close();
         if(n==0)
             break;
     }
-    out.close();
     cout<<"添加成功,按任意键返回主菜单"<<endl;
     cin.get();
 }
@@ -1565,7 +1566,7 @@ void count_book_information()
         cout<<"\t\t\t\t└──────────────────────────────────┘\n";
         cout<<"请输入你的选择:";cin>>n;
         if(n==1){
-            int sum=0;int k;
+            int sum=1;int k;
             book_date book;
             in.open("book.txt");
             while(in.peek()!=EOF){
@@ -1606,7 +1607,7 @@ void count_book_information()
             while(in.peek()!=EOF){//即关键字不会重复出现
                 in>>book;//这样就保证了统计时不会出现两个相同的类别
                 mymap.insert(pair<string,int>(book.get_classification(),1));
-            }//且时间复杂度为O(1);
+            }//且时间复杂度为O(nlogn);
             in.close();//同时map也更好操作
             auto it=mymap.begin();//唯一的缺点是用到了C++11的迭代器
             int sum=0;//必须用支持C++11的编译器编译
@@ -2036,7 +2037,7 @@ void revise_personal_information(people &person)
                         cout<<"两次密码不同,请重新输入"<<endl;
                     }
                 }
-            cout<<"确认将密码修改为:"<<password3<<"?(1:yes   2:no)"<<endl;
+            cout<<"确认将密码修改为:"<<password3<<"?(1:yes   0:no)"<<endl;
             cin>>n;
             if(n==1){
                 in.open("password1.txt");
